@@ -32,3 +32,19 @@
 - 实现了初步的地图识别功能
 
 ## v1.0 工具发布
+
+# 为本项目提供了帮助的朋友
+- 明日方舟一图流：为本工具提供了在线部署，您现在可以在[明日方舟一图流](https://ark.yituliu.cn/tools/sui)访问本工具。
+- 森空岛@伊万德（NGA@ZHider）：优化功能交互，重构了部分代码，实现了滚轮和右键快捷编辑格点功能
+- NGA@zyc06：实现了右键快捷关闭功能。
+
+# 声明
+made by [森空岛@路余](https://www.skland.com/profile?id=6809692860879) / weibo@路过_某G
+
+感谢[deepseek](https://www.deepseek.com/)老师的大力支持
+
+图像识别依赖[OpenCV.js](https://docs.opencv.org/4.x/df/d0a/tutorial_js_intro.html)实现，本库内提供的openCV.js复制自[https://docs.opencv.org/4.5.0/opencv.js](https://docs.opencv.org/4.5.0/opencv.js)
+
+图标及识别模板来自鹰角网络旗下游戏《明日方舟》，本工具不拥有任何相关权利。
+
+作者不对本工具内任何代码主张署名以外的权利，您可以随意使用或者改写，但请标注来源。我不对您的任何用途及后果承担责任。
