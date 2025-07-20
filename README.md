@@ -45,6 +45,9 @@ made by [森空岛@路余](https://www.skland.com/profile?id=6809692860879) / we
 
 图像识别依赖[OpenCV.js](https://docs.opencv.org/4.x/df/d0a/tutorial_js_intro.html)实现，本库内提供的openCV.js复制自[https://docs.opencv.org/4.5.0/opencv.js](https://docs.opencv.org/4.5.0/opencv.js)
 
-图标及识别模板来自鹰角网络旗下游戏《明日方舟》，本工具不拥有任何相关权利。
+tempBase64.js内的图标及识别模板除特殊声明外，均来自鹰角网络旗下游戏《明日方舟》，本工具不拥有任何相关权利。
+> tempBase64.js内RewardIcons对象的所有svg为本人制作，您不应该在本工具以外的场合使用它们。
 
 作者不对本工具内任何代码主张署名以外的权利，您可以随意使用或者改写，但请标注来源。我不对您的任何用途及后果承担责任。
+
+
