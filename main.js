@@ -6,14 +6,18 @@ document.addEventListener("DOMContentLoaded", function () {
     let isDrawing = false;
     let startCell = null;
     let imageData = {};
-    // 添加全局变量
+    // 识别用的地图
     let recmapImageData = null;
-    // 在全局变量部分添加
+    //悬浮菜单超时
     let quickMenu = document.getElementById("quick-menu");
     let quickMenuTimeout = null;
-
-    // 在全局变量部分添加
-    let isDragging = false; // 新增拖拽状态标志
+    // 拖拽状态超时时关闭悬浮菜单
+    let dragStartTime = 0;
+    const DRAG_THRESHOLD = 200; // 200ms后关闭菜单
+    //笔记是否正在编辑（悬浮菜单）
+    let isEditingNotes = false; // 
+    // 是否正在拖拽
+    let isDragging = false;
 
     document.addEventListener('contextmenu', function (e) {
         const popup = document.getElementById('popup');
@@ -61,6 +65,7 @@ document.addEventListener("DOMContentLoaded", function () {
         choumou: "筹谋",
         blank: "无",
     };
+    
 
     // DOM元素
     const gridContainer = document.getElementById("grid-container");
@@ -296,19 +301,26 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
-    // 处理单元格鼠标按下事件
+    // 修改handleCellMouseDown函数
     function handleCellMouseDown(e) {
         const cell = e.currentTarget;
         const row = parseInt(cell.dataset.row);
         const col = parseInt(cell.dataset.col);
 
-
         // 左键点击 绘制
         if (e.button === 0) {
             isDragging = true; // 设置拖拽状态
+            dragStartTime = Date.now(); // 记录拖拽开始时间
             isDrawing = true;
             startCell = { row, col };
             currentCell = cell;
+
+            // 检查是否应该关闭菜单
+            setTimeout(() => {
+                if (isDragging && Date.now() - dragStartTime >= DRAG_THRESHOLD) {
+                    quickMenu.style.display = 'none';
+                }
+            }, DRAG_THRESHOLD);
 
             e.preventDefault();
             e.stopPropagation();
@@ -324,16 +336,19 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+
     function handleMouseMove(e) {
         if (!isDrawing) return;
 
         // 防止在拖动时选中文本
         e.preventDefault();
     }
+
     function handleMouseUp(e) {
         if (isDrawing) {
             isDrawing = false;
             isDragging = false; // 清除拖拽状态
+            dragStartTime = 0;
             startCell = null;
             currentCell = null;
 
@@ -422,6 +437,9 @@ document.addEventListener("DOMContentLoaded", function () {
         index += event.deltaY > 0 ? 1 : -1;
         index = (index + types.length) % types.length;
         changeCurrentCellType(types[index]);
+
+        //滚轮后更新快捷菜单
+        showQuickMenu(cell, cellKey);
 
         event.preventDefault();
     }
@@ -1230,9 +1248,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const col = parseInt(cell.dataset.col);
         const cellKey = `${row},${col}`;
 
-        if (!gridData[cellKey] ||
-            !['changle', 'zayi', 'shiyi'].includes(gridData[cellKey].type) ||
-            cell.classList.contains("start")) {
+        if (!gridData[cellKey] || cell.classList.contains("start")) {
             return;
         }
 
@@ -1241,22 +1257,14 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         quickMenuTimeout = setTimeout(() => {
-            if (cell.matches(':hover') && !isDragging) { // 添加拖拽状态检查
+            if (cell.matches(':hover') && !isDragging) {
+                // 如果菜单已经显示且是同一个单元格，则不重复显示
+                if (quickMenu.style.display === 'flex' && quickMenu.dataset.cellKey === cellKey) {
+                    return;
+                }
                 showQuickMenu(cell, cellKey);
             }
         }, 200);
-    }
-
-    function handleCellMouseLeaveForQuickMenu(e) {
-        if (quickMenuTimeout) {
-            clearTimeout(quickMenuTimeout);
-        }
-
-        // 只有当鼠标没有移动到菜单上时才隐藏
-        const relatedTarget = e.relatedTarget;
-        if (!relatedTarget || !relatedTarget.closest('.quick-menu')) {
-            quickMenu.style.display = 'none';
-        }
     }
 
     function showQuickMenu(cell, cellKey) {
@@ -1265,57 +1273,142 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // 设置菜单位置
         const rect = cell.getBoundingClientRect();
-        quickMenu.style.left = `${rect.right + 10}px`;
+        quickMenu.style.left = `${rect.right}px`;
         quickMenu.style.top = `${rect.top}px`;
 
-        // 根据单元格类型添加对应的选项按钮
         const cellData = gridData[cellKey];
         const type = cellData.type;
 
-        // 获取对应类型的表单部分
-        const formSection = document.querySelector(`.form-section.${type}`);
-        if (!formSection) return;
-
-        // 杂疑类型的特殊处理
-        if (type === 'zayi') {
-            // 更多奖励
-            const moreButtons = formSection.querySelectorAll('[data-group="more"] .option-button');
-            addButtonsToQuickMenu(moreButtons, "更多奖励", cell, cellKey, cellData.formData?.more);
-
-            // 添加分割线
-            const divider1 = document.createElement('div');
-            divider1.className = 'quick-menu-divider';
-            quickMenu.appendChild(divider1);
-
-            // 普通奖励
-            const normalButtons = formSection.querySelectorAll('[data-group="normal"] .option-button');
-            addButtonsToQuickMenu(normalButtons, "普通奖励", cell, cellKey, cellData.formData?.normal);
-
-            // 添加分割线
-            const divider2 = document.createElement('div');
-            divider2.className = 'quick-menu-divider';
-            quickMenu.appendChild(divider2);
-
-            // 结局节点
-            const endButtons = formSection.querySelectorAll('[data-group="end"] .option-button');
-            addButtonsToQuickMenu(endButtons, "结局节点", cell, cellKey, cellData.formData?.end);
+        // 添加截图区域
+        const imageContainer = document.createElement('div');
+        if (cellData.image) {
+            imageContainer.className = 'quick-menu-image';
+            imageContainer.innerHTML = `<img src="${cellData.image}">`;
         } else {
-            // 其他类型正常处理
-            const optionButtons = formSection.querySelectorAll('.option-button');
-            const selectedOption = cellData.formData?.[type];
-            addButtonsToQuickMenu(optionButtons, null, cell, cellKey, selectedOption);
+            imageContainer.className = 'quick-menu-image-placeholder';
+            imageContainer.textContent = '在笔记框内按Ctrl+V粘贴截图';
         }
+        quickMenu.appendChild(imageContainer);
+
+        // 添加笔记编辑框
+        const noteSection = document.createElement('div');
+        noteSection.className = 'quick-menu-note';
+        noteSection.contentEditable = true;
+        noteSection.textContent = cellData.notes || '';
+        noteSection.addEventListener('input', function () {
+            // 实时保存笔记内容
+            gridData[cellKey].notes = this.textContent;
+        });
+        quickMenu.appendChild(noteSection);
+
+        
+        // 添加焦点事件监听
+        noteSection.addEventListener('focus', () => {
+            isEditingNotes = true;
+        });
+
+        // 添加失去焦点事件监听
+        noteSection.addEventListener('blur', () => {
+            isEditingNotes = false;
+            // 失去焦点后延迟检查是否需要隐藏
+            setTimeout(() => {
+                if (!quickMenu.matches(':hover') && !currentCell?.matches(':hover')) {
+                    quickMenu.style.display = 'none';
+                }
+            }, 300);
+        });
 
 
 
+        // 根据单元格类型添加对应的选项按钮
+        if (['changle', 'zayi', 'shiyi'].includes(type)) {
+            // 获取对应类型的表单部分
+            const formSection = document.querySelector(`.form-section.${type}`);
 
+            // 创建适用特殊表单的子菜单，后续操作均添加到subquickMenu
+            const subQuickMenu = document.createElement('div');
+            subQuickMenu.className = 'quick-menu-subs'
+            quickMenu.appendChild(subQuickMenu);
+
+            const subQmenu = document.querySelector(`.quick-menu-subs`)
+
+            if (formSection) {
+                // 杂疑类型的特殊处理
+                if (type === 'zayi') {
+                    // 更多奖励
+                    const moreButtons = formSection.querySelectorAll('[data-group="more"] .option-button');
+                    addButtonsToQuickMenu(moreButtons, "更多奖励", cell, cellKey, cellData.formData?.more);
+
+                    // 添加分割线
+                    const divider1 = document.createElement('div');
+                    divider1.className = 'quick-menu-divider';
+                    subQmenu.appendChild(divider1);
+
+                    // 普通奖励
+                    const normalButtons = formSection.querySelectorAll('[data-group="normal"] .option-button');
+                    addButtonsToQuickMenu(normalButtons, "普通奖励", cell, cellKey, cellData.formData?.normal);
+
+                    // 添加分割线
+                    const divider2 = document.createElement('div');
+                    divider2.className = 'quick-menu-divider';
+                    subQmenu.appendChild(divider2);
+
+                    // 结局节点
+                    const endButtons = formSection.querySelectorAll('[data-group="end"] .option-button');
+                    addButtonsToQuickMenu(endButtons, "结局节点", cell, cellKey, cellData.formData?.end);
+                } else {
+                    // 其他类型正常处理
+                    const optionButtons = formSection.querySelectorAll('.option-button');
+                    const selectedOption = cellData.formData?.[type];
+                    addButtonsToQuickMenu(optionButtons, null, cell, cellKey, selectedOption);
+                }
+            }
+        }
 
         // 显示菜单
         quickMenu.style.display = 'flex';
-    }
 
+        // 添加粘贴事件监听
+        const handlePaste = function (e) {
+            const items = e.clipboardData.items;
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].type.indexOf("image") !== -1) {
+                    const file = items[i].getAsFile();
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        gridData[cellKey].image = e.target.result;
+                        imageContainer.className = 'quick-menu-image';
+                        imageContainer.innerHTML = `<img src="${e.target.result}">`;
+                    };
+                    reader.readAsDataURL(file);
+                    e.preventDefault();
+                    break;
+                }
+            }
+        };
+
+        // 添加事件监听器
+        quickMenu.addEventListener('paste', handlePaste);
+
+        // 保存当前单元格引用
+        quickMenu.dataset.cellKey = cellKey;
+
+        // 在菜单关闭时移除事件监听
+        // 修改 showQuickMenu 函数中的检查逻辑
+        const checkMenuClose = function () {
+            if (!quickMenu.matches(':hover') && !cell.matches(':hover')) {
+                quickMenu.style.display = 'none';
+                quickMenu.removeEventListener('paste', handlePaste);
+                document.removeEventListener('mousemove', checkMenuClose);
+            }
+        };
+
+        document.addEventListener('mousemove', checkMenuClose);
+    }
     // 辅助函数：添加按钮到快捷菜单
     function addButtonsToQuickMenu(buttons, groupTitle, cell, cellKey, selectedOption) {
+        const subQmenu = document.querySelector(`.quick-menu-subs`)
+
         if (groupTitle) {
             const title = document.createElement('div');
             title.className = 'quick-menu-title';
@@ -1323,7 +1416,7 @@ document.addEventListener("DOMContentLoaded", function () {
             title.style.fontSize = '11px';
             title.style.color = '#999';
             title.style.padding = '4px 8px';
-            quickMenu.appendChild(title);
+            subQmenu.appendChild(title);
         }
 
         buttons.forEach(button => {
@@ -1371,7 +1464,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 //quickMenu.style.display = 'none';
             });
 
-            quickMenu.appendChild(quickButton);
+            subQmenu.appendChild(quickButton);
         });
     }
 
@@ -1393,23 +1486,29 @@ document.addEventListener("DOMContentLoaded", function () {
             clearTimeout(quickMenuTimeout);
         }
 
+        // 如果正在编辑笔记，则不隐藏菜单
+        if (isEditingNotes) return;
+
         // 只有当鼠标没有移动到菜单上时才设置延迟隐藏
         const relatedTarget = e.relatedTarget;
-        if (!relatedTarget || !relatedTarget.closest('.quick-menu')) {
+        if (!relatedTarget || !(relatedTarget === quickMenu || relatedTarget.closest('.quick-menu'))) {
             quickMenuTimeout = setTimeout(() => {
                 // 再次检查鼠标是否在菜单或单元格上
                 if (!quickMenu.matches(':hover') && !currentCell?.matches(':hover')) {
                     quickMenu.style.display = 'none';
                 }
-            }, 200); // 300ms的延迟
+            }, 200); // 200ms的延迟
         }
     }
-
     // 添加菜单的 mouseleave 事件
+    // 修改 quickMenu 的 mouseleave 事件
     quickMenu.addEventListener('mouseleave', (e) => {
         if (quickMenuTimeout) {
             clearTimeout(quickMenuTimeout);
         }
+
+        // 如果正在编辑笔记，则不隐藏菜单
+        if (isEditingNotes) return;
 
         quickMenuTimeout = setTimeout(() => {
             // 检查鼠标是否在关联的单元格上

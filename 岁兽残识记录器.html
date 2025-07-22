@@ -565,6 +565,7 @@
             flex-direction: column;
             gap: 4px;
             min-width: 120px;
+            width: 240px;
         }
 
         .quick-menu-button {
@@ -576,6 +577,8 @@
             color: white;
             text-align: left;
             background-color: #444;
+            white-space: nowrap;
+
         }
 
         .quick-menu-button:hover {
@@ -587,6 +590,11 @@
             height: 1px;
             background-color: #555;
             margin: 4px 0;
+            width: 100%;
+        }
+
+        .quick-menu-title {
+            width: 100%;
         }
 
         /* 修改标记容器样式 */
@@ -829,6 +837,61 @@
         .candle-value button:hover {
             background-color: #555555;
         }
+
+        /*悬浮菜单：笔记与截图*/
+        /* 添加在现有CSS中 */
+        .quick-menu-note {
+            min-height: 20px;
+            /* 一行高度 */
+            overflow: auto;
+            font-size: 12px;
+            padding: 8px;
+            background-color: var(--bg-color2);
+            margin-bottom: 4px;
+            border: none;
+            border-bottom: 1px solid #555;
+            font-size: unset;
+            font-weight: bold;
+        }
+
+        .quick-menu-note:empty::before {
+            content: "在此输入笔记...";
+            color: #565656;
+            font-size: small;
+        }
+
+        .quick-menu-image-placeholder {
+            width: 100%;
+            height: 40px;
+            background-color: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 12px;
+            border-radius: 4px;
+            margin-top: 4px;
+            border: 1px dashed #555;
+        }
+
+        .quick-menu-image {
+            width: 100%;
+            margin-top: 4px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .quick-menu-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .quick-menu-subs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px 8px
+        }
     </style>
 </head>
 
@@ -841,7 +904,7 @@
         鼠标<b>滚轮</b>可以切换节点类型。<br />
         点击节点可以编辑节点类型或者记笔记。在笔记框内粘贴图片可以记录截图。<br />
         <b>“识别地图输入”</b>可以识别地图截图，勾选<b>“保留数据”</b>“可以在道中更新节点类型而不影响已记录的信息。<br>
-        <span style="color: green">v1.3：增加烛火记录、炎国干员速查、优化了部分体验</span>
+        <span style="color: green">v1.3：增加烛火记录、炎国干员速查、优化了悬浮菜单、优化了部分体验</span>
     </p>
     <p style="color: orangered">
         已知bug：截图过小时识别效果不佳，不建议在过小的窗口里截图。<br />识别图片功能运行开销较大，电脑风扇会狂转。
@@ -1113,7 +1176,7 @@
                     </table>
 
                     <p><br><br></p>
-                    <p>数据更新截止于2025.07.22界园肉鸽发布初期，并非实时更新，可能导致以上内容过时。</p>                  
+                    <p>数据更新截止于2025.07.22界园肉鸽发布初期，并非实时更新，可能导致以上内容过时。</p>
 
                     <details>
 
@@ -1242,6 +1305,9 @@
                         <button class="option-button" data-option="coin">通宝</button>
                     </div>
                 </div>
+
+
+
             </div>
 
 
@@ -1316,6 +1382,7 @@
         <h4>v1.3</h4>
         <p>- 增加炎国干员速查</p>
         <p>- 增加烛火记录</p>
+        <p>- 完善了悬浮菜单</p>
         <p>- 优化了部分功能和视觉效果</p>
         <details>
             <summary>此前的版本</summary>
