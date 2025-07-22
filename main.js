@@ -481,7 +481,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             line.style.left = `${(left - 1) * (cellSize + gapSize) + cellSize
                 }px`;
-            line.style.top = `${(connection.row1 - 1) * (cellSize + gapSize)
+            line.style.top = `${(connection.row1 - 1) * (cellSize + gapSize / 2)
                 }px`;
             line.style.width = `${width * (cellSize + gapSize) - cellSize + gapSize
                 }px`;
