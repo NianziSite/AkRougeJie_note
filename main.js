@@ -58,7 +58,7 @@ document.addEventListener("DOMContentLoaded", function () {
         zayi: "杂疑",
         gusi: "故肆",
         changle: "常乐",
-        choumou: "筹谋",        
+        choumou: "筹谋",
         blank: "无",
     };
 
@@ -88,6 +88,9 @@ document.addEventListener("DOMContentLoaded", function () {
         gridData = {};
         imageData = {};
         connections = [];
+        //重置烛火
+        resetCandle();
+
 
         grid.innerHTML = "";
         gridContainer.innerHTML =
@@ -979,6 +982,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 })
                 .catch((error) => {
                     console.error("识别失败:", error);
+                    alert(("识别失败: " + error.message || "未知错误") + "\n请尽量确保截图只包含地图节点，而不包含游戏界面。（参照示例图）");
                 });
         });
 
@@ -995,6 +999,26 @@ document.addEventListener("DOMContentLoaded", function () {
      * 根据识别结果更新网格
      * param {Object} result - recognizeMap函数的返回结果
      */
+
+    // 监听是否勾选“保留数据”改变提0示文档
+    // 获取复选框状态
+    const preserveData_hint = document.getElementById("preserve-data").checked;
+
+    // 获取两个提示元素
+    const noPreserveHint = document.getElementById("no-preserve-hint");
+    const preserveHint = document.getElementById("preserve-hint");
+
+    // 根据复选框状态显示/隐藏提示
+    noPreserveHint.style.display = preserveData_hint ? "none" : "inline";
+    preserveHint.style.display = preserveData_hint ? "inline" : "none";
+
+    // 如果需要动态响应复选框变化，可以添加事件监听器
+    document.getElementById("preserve-data").addEventListener("change", function () {
+        const isChecked = this.checked;
+        noPreserveHint.style.display = isChecked ? "none" : "inline";
+        preserveHint.style.display = isChecked ? "inline" : "none";
+    });
+
     // 修改updateGridFromRecognition函数
     function updateGridFromRecognition(result) {
         const preserveData = document.getElementById("preserve-data").checked;
@@ -1013,6 +1037,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 result.startPos[0],
                 result.startPos[1]
             );
+            resetCandle();
         }
 
         // 设置格子类型和状态
@@ -1072,6 +1097,8 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
 
+        //绘制连接线   
+
         if (!preserveData) {
             // 如果不保留现有数据，则绘制新的连接线
             connections = [];
@@ -1088,6 +1115,36 @@ document.addEventListener("DOMContentLoaded", function () {
                 };
                 connections.push(connection);
                 drawConnection(connection);
+            });
+        } else {
+            // 如果保留现有数据，检查并添加defaultConnections中不存在于connections的连接
+            // 默认连接：上下左右
+            const defaultConnections = [
+                [3, 4, 3, 3],
+                [3, 4, 2, 4],
+                [3, 4, 3, 5],
+                [3, 4, 4, 4]
+            ];
+
+            defaultConnections.forEach((conn) => {
+                const [r1, c1, r2, c2] = conn;
+                const key = `${r1},${c1}-${r2},${c2}`;
+                const reverseKey = `${r2},${c2}-${r1},${c1}`;
+
+                // 检查是否已存在该连接（正向或反向）
+                const exists = connections.some(c => c.key === key || c.key === reverseKey);
+
+                if (!exists) {
+                    const connection = {
+                        key: key,
+                        row1: r1,
+                        col1: c1,
+                        row2: r2,
+                        col2: c2,
+                    };
+                    connections.push(connection);
+                    drawConnection(connection);
+                }
             });
         }
     }
@@ -1415,6 +1472,204 @@ document.addEventListener("DOMContentLoaded", function () {
             cell.appendChild(badgeContainer);
         }
     }
+
+    // ----------------------------------------------------------------//
+    // 炎干员速查
+    const toggleBtn = document.getElementById('yanchecker-toggle-btn');
+    const closeBtn = document.getElementById('yanchecker-close-btn');
+    const card = document.getElementById('yanchecker-card');
+    const table = document.getElementById('yanchecker-table');
+
+    // 当前选中的筛选条件
+    let currentClass = 'all';
+    let currentRarity = 'all';
+
+    // 切换卡片显示/隐藏
+    function toggleCard() {
+        if (card.style.display === 'block') {
+            card.style.display = 'none';
+        } else {
+            card.style.display = 'block';
+        }
+    }
+
+    // 初始化筛选按钮事件
+    function initFilterButtons() {
+        const classBtns = document.querySelectorAll('.yanchecker-class-btn');
+        const rarityBtns = document.querySelectorAll('.yanchecker-rarity-btn');
+
+        classBtns.forEach(btn => {
+            btn.addEventListener('click', function () {
+                // 移除所有class按钮的active类
+                classBtns.forEach(b => b.classList.remove('active'));
+                // 给当前按钮添加active类
+                this.classList.add('active');
+                // 更新当前选中的职业
+                currentClass = this.getAttribute('data-class');
+                // 应用筛选
+                applyFilters();
+            });
+        });
+
+        rarityBtns.forEach(btn => {
+            btn.addEventListener('click', function () {
+                // 移除所有rarity按钮的active类
+                rarityBtns.forEach(b => b.classList.remove('active'));
+                // 给当前按钮添加active类
+                this.classList.add('active');
+                // 更新当前选中的星级
+                currentRarity = this.getAttribute('data-rarity');
+                // 应用筛选
+                applyFilters();
+            });
+        });
+
+        // 默认选中"全部"
+        document.querySelector('.yanchecker-class-btn[data-class="all"]').classList.add('active');
+        document.querySelector('.yanchecker-rarity-btn[data-rarity="all"]').classList.add('active');
+    }
+
+    // 应用筛选条件
+    function applyFilters() {
+        const cells = document.querySelectorAll('.yanchecker-cell');
+        const headers = document.querySelectorAll('.yanchecker-rarity-header');
+        const rarityCells = document.querySelectorAll('.yanchecker-rarity-cell');
+
+        // 先全部显示
+        cells.forEach(cell => {
+            cell.classList.remove('yanchecker-hidden');
+            cell.parentElement.classList.remove('yanchecker-hidden');
+        });
+
+        headers.forEach(header => {
+            header.classList.remove('yanchecker-hidden');
+            header.parentElement.classList.remove('yanchecker-hidden');
+        });
+
+        rarityCells.forEach(cell => {
+            cell.classList.remove('yanchecker-hidden');
+            cell.parentElement.classList.remove('yanchecker-hidden');
+        });
+
+        // 应用职业筛选
+        if (currentClass !== 'all') {
+
+            cells.forEach(cell => {
+                if (cell.getAttribute('data-class') !== currentClass) {
+                    cell.classList.add('yanchecker-hidden');
+                    // 如果整行都隐藏了，隐藏行
+                    const row = cell.parentElement;
+                    const visibleCells = row.querySelectorAll('.yanchecker-cell:not(.yanchecker-hidden)');
+                    if (visibleCells.length === 0) {
+                        row.classList.add('yanchecker-hidden');
+                    }
+                }
+            });
+        }
+
+        // 应用星级筛选
+        if (currentRarity !== 'all') {
+            headers.forEach(header => {
+                if (header.getAttribute('data-rarity') !== currentRarity &&
+                    header.getAttribute('data-rarity') !== 'all') {
+                    header.classList.add('yanchecker-hidden');
+                }
+            });
+
+
+            rarityCells.forEach(cell => {
+                if (cell.getAttribute('data-rarity') !== currentRarity) {
+                    cell.classList.add('yanchecker-hidden');
+                }
+            });
+
+            cells.forEach(cell => {
+                if (cell.getAttribute('data-rarity') !== currentRarity) {
+                    cell.classList.add('yanchecker-hidden');
+                    // 如果整行都隐藏了，隐藏行
+                    const row = cell.parentElement;
+                    const visibleCells = row.querySelectorAll('.yanchecker-cell:not(.yanchecker-hidden)');
+                    if (visibleCells.length === 0) {
+                        row.classList.add('yanchecker-hidden');
+                    }
+                }
+            });
+        }
+
+        // 调整列宽
+        adjustColumnWidths();
+    }
+
+    // 调整列宽
+    function adjustColumnWidths() {
+        const visibleHeaders = document.querySelectorAll('.yanchecker-class-header:not(.yanchecker-hidden)');
+
+        if (visibleHeaders.length === 1) {
+            visibleHeaders[0].classList.add('yanchecker-full-width');
+        } else {
+            visibleHeaders.forEach(header => {
+                header.classList.remove('yanchecker-full-width');
+            });
+        }
+    }
+
+    // 初始化
+    initFilterButtons();
+
+    // 事件监听
+    toggleBtn.addEventListener('click', toggleCard);
+
+    closeBtn.addEventListener('click', function () {
+        card.style.display = 'none';
+    });
+
+    // 为容器添加鼠标移入移出事件
+    const container = document.querySelector('.yanchecker-container');
+
+    container.addEventListener('mouseenter', function () {
+        card.style.display = 'block';
+    });
+
+    container.addEventListener('mouseleave', function () {
+        card.style.display = 'none';
+    });
+
+    // 保持原有的点击按钮切换功能
+    toggleBtn.addEventListener('click', function (e) {
+        e.stopPropagation(); // 阻止事件冒泡
+        toggleCard();
+    });
+
+    //------------------------------------------------------------//
+    // 烛火计数
+    // 获取烛火输入框
+    const candleInput = document.getElementById('candle');
+
+    // 监听直接修改数字的情况
+    candleInput.addEventListener('change', function () {
+        // 非负整数验证
+        let value = parseInt(this.value);
+        if (isNaN(value) || value < 0) {
+            this.value = 0;
+        } else {
+            this.value = value; // 确保是整数
+        }
+    });
+
+    // 重置函数 - 可以被其他函数调用
+    window.resetCandle = function () {
+        candleInput.value = 0;
+    };
+
+    // 改变烛火值的函数
+    window.changeCandle = function (amount) {
+        let current = parseInt(candleInput.value);
+        if (isNaN(current)) current = 0;
+        candleInput.value = current + amount;
+    };
+
+
+    //------------------------------------------------------------//
 
     // 识别地图的示例函数
     /**
