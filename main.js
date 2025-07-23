@@ -481,7 +481,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             line.style.left = `${(left - 1) * (cellSize + gapSize) + cellSize
                 }px`;
-            line.style.top = `${(connection.row1 - 1) * (cellSize + gapSize / 2)
+            line.style.top = `${(connection.row1 - 1) * (cellSize + gapSize)
                 }px`;
             line.style.width = `${width * (cellSize + gapSize) - cellSize + gapSize
                 }px`;
@@ -984,16 +984,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
 
-            // 获取按钮元素
-            const confirmButton = document.getElementById("confirm-recmap");
-            const originalText = confirmButton.textContent;
-            
-            // 禁用按钮并更改文本
-            confirmButton.disabled = true;
-            confirmButton.textContent = "识别中，请稍候...";
-            confirmButton.style.opacity = "0.6";
-            confirmButton.style.cursor = "not-allowed";
-
             // 异步调用识别函数
             recognizeGrid(recmapImageData)
                 .then((recognitionResult) => {
@@ -1011,13 +1001,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 .catch((error) => {
                     console.error("识别失败:", error);
                     alert(("识别失败: " + error.message || "未知错误") + "\n请尽量确保截图只包含地图节点，而不包含游戏界面。（参照示例图）");
-                })
-                .finally(() => {
-                    // 无论成功或失败都恢复按钮状态
-                    confirmButton.disabled = false;
-                    confirmButton.textContent = originalText;
-                    confirmButton.style.opacity = "1";
-                    confirmButton.style.cursor = "pointer";
                 });
         });
 
