@@ -10,8 +10,8 @@
             --bg-color: #1a1a1a;
             --bg-color2: #242424;
             --grid-bg: #2d2d2d;
-            --grid-size: 100px;
-            --grid-gap: 40px;
+            --grid-size: 56px;
+            --grid-gap: 24px;
             --line-color: #ff6b9e;
             --line-color-unknown: #6e6e6e;
             --text-color: #e0e0e0;
@@ -33,11 +33,11 @@
             font-family: "Arial", sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
-            margin: 0 auto;
+            margin: 0;
+            padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-width: 768px;
         }
 
         hr {
@@ -51,9 +51,6 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            max-width: 960px;
-            margin: 0 auto;
-            width: 100%;
         }
 
         a {
@@ -70,16 +67,13 @@
 
         .grid-container {
             position: relative;
+            margin-bottom: 20px;
             z-index: 1;
-            display: flex;
-            justify-content: center;
-            width: 100%;
         }
 
         .grid {
             display: grid;
             gap: var(--grid-gap);
-            row-gap: calc(var(--grid-gap) / 2);
             position: relative;
             z-index: 1;
         }
@@ -154,12 +148,12 @@
         }
 
         .grid-icon {
-            width: 40px;
-            height: 40px;
+            width: 30px;
+            height: 30px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
 
         .unknown .grid-icon {
@@ -172,11 +166,11 @@
         }
 
         .grid-label {
-            font-size: 14px;
+            font-size: 11px;
             color: white;
             text-align: center;
             position: absolute;
-            bottom: 4px;
+            bottom: 2px;
             width: 100%;
         }
 
@@ -197,13 +191,13 @@
         }
 
         .connection.horizontal {
-            height: 12px;
-            transform: translateY(calc(var(--grid-size) / 2 - 6px));
+            height: 8px;
+            transform: translateY(calc(var(--grid-size) / 2 - 4px));
         }
 
         .connection.vertical {
-            width: 12px;
-            transform: translateX(calc(var(--grid-size) / 2 + 6px));
+            width: 8px;
+            transform: translateX(calc(var(--grid-size) / 2 - 4px));
         }
 
         .popup {
@@ -213,7 +207,7 @@
             height: 100vh;
             background-color: var(--bg-color2);
             border-radius: 8px;
-            padding: 20px;
+            padding: 16px;
             z-index: 100;
             box-shadow: 0 4px 12px rgba(48, 48, 48, 0.3);
             width: 500px;
@@ -222,7 +216,6 @@
             /* 初始状态：完全隐藏在右侧 */
             transition: transform 0.3s ease-in-out;
             /* 添加过渡效果 */
-            font-size: 15px;
         }
 
         .popup.hidden {
@@ -239,17 +232,16 @@
             margin-top: 0;
             margin-bottom: 16px;
             color: var(--text-color);
-            font-size: 20px;
         }
 
         .popup-section {
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
 
         .popup label {
             display: block;
             margin-bottom: 8px;
-            font-size: 16px;
+            font-size: 14px;
         }
 
         .popup input[type="text"],
@@ -263,7 +255,6 @@
             border-radius: 4px;
             color: var(--text-color);
             margin-bottom: 6px;
-            font-size: 15px;
         }
 
         .popup textarea {
@@ -279,11 +270,11 @@
         }
 
         .type-button {
-            padding: 8px 14px;
+            padding: 6px 12px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 15px;
+            font-size: 12px;
             color: white;
         }
 
@@ -365,15 +356,8 @@
         }
 
         .buttons {
-            width: 100%;
             display: flex;
-            justify-content: space-between;
-        }
-
-        .main-buttons {
-            width: 80%;
-            display: flex;
-            justify-content: space-between;
+            gap: 100px;
         }
 
         .buttons label {
@@ -416,7 +400,6 @@
             cursor: pointer;
             font-size: 14px;
             margin-top: 20px;
-            min-width: 140px;
         }
 
         .recmap-button:hover {
@@ -488,32 +471,21 @@
             display: block;
         }
 
-        h1 {
-            margin: 16px 0 0 0;
-        }
-
-        h2 {
-            margin: 4px 0 0 0;
-            font-size: 20px;
-            font-weight: normal;
-        }
-
         p {
-            font-size: 16px;
-            color: #aaa;
-            margin: 8px 0;
+            font-size: 12px;
+            color: #999;
         }
 
         .paste-hint {
-            font-size: 14px;
+            font-size: 12px;
             color: #999;
             margin-top: 5px;
         }
 
         #recmap-popup {
-            width: 450px;
+            width: 300px;
             height: auto;
-            padding: 25px;
+            padding: 20px;
             left: 50%;
             top: 50%;
             transform: translate(-50%, -50%);
@@ -925,7 +897,7 @@
 
 <body>
     <h1>岁兽残识记图器</h1>
-    <h2>脑子总有记不住东西的时候……</h2>
+    <p>脑子总有记不住东西的时候……</p>
     <p>
         鼠标<b>拖拽</b>可以在节点之间绘制连接点，反向拖拽可以删除。
         <br />鼠标<b>右键</b>可以切换节点开关状态。以及快捷关闭打开的菜单。<br />
@@ -934,7 +906,9 @@
         <b>“识别地图输入”</b>可以识别地图截图，勾选<b>“保留数据”</b>“可以在道中更新节点类型而不影响已记录的信息。<br>
         <span style="color: green">v1.3：增加烛火记录、炎国干员速查、优化了悬浮菜单、优化了部分体验</span>
     </p>
-
+    <p style="color: orangered">
+        已知bug：截图过小时识别效果不佳，不建议在过小的窗口里截图。<br />识别图片功能运行开销较大，电脑风扇会狂转。
+    </p>
     
     <div class="main">
         <div class="controls">
@@ -1223,7 +1197,7 @@
         <div class="grid-container" id="grid-container">
             <div class="grid" id="grid"></div>
         </div>
-        <div class="main-buttons">
+        <div class="buttons">
             <div class="recmap-btn-group">
                 <button class="recmap-button" id="recmap-button">
                     识别地图输入
@@ -1347,10 +1321,7 @@
         <div class="popup hidden" id="recmap-popup">
             <h3>识别地图输入</h3>
             <p>
-                请粘贴游戏地图的截图，点击确认后可能需要等待几秒，电脑cpu会狂转一会儿，因为目前的识别算法没有经过任何优化。<br />
-            </p>
-            <p style="color: orangered; background-color: rgba(255, 87, 34, 0.1); padding: 12px; border-radius: 4px; border-left: 4px solid orangered;">
-                <b>注意：</b>请确保截图内容只包含完整的地图部分，否则会识别失败。具体请参考下方示例<br />截图过小时识别效果不佳，不建议在过小的窗口里截图。<br />识别图片功能运行开销较大，电脑风扇会狂转。
+                请粘贴游戏地图的截图，点击确认后可能需要等待几秒，电脑cpu会狂转一会儿，因为目前的识别算法没有经过任何优化。<br /><b>确保截图内容只包含完整的地图部分，否则会识别失败</b>
             </p>
             <div class="example_img"><img src="example.png" /></div>
 
