@@ -29,7 +29,7 @@
 - [x] feature: 可以标注高亮的节点
 - [x] feature：更完善的悬停菜单
 - [ ] feature：保存进度到浏览器，以便离开后返回
-- [ ] feature: 增加对祸乱节点的标注
+- [x] feature: 增加对祸乱节点的标注
 - [ ] feature: 增加大小调节
    - bug: 似乎直接调整数值会碰到Bug
 
