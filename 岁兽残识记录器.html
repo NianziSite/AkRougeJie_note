@@ -892,6 +892,7 @@
             flex-wrap: wrap;
             gap: 4px 8px
         }
+
         /* 收藏星星 */
         .cell-star {
             position: absolute;
@@ -919,8 +920,8 @@
             opacity: 0.5;
             color: #ccc;
         }
-        /* 收藏星星 - end */
 
+        /* 收藏星星 - end */
     </style>
 </head>
 
@@ -1335,6 +1336,28 @@
                         <button class="option-button" data-option="shield4">+4护盾</button>
                         <button class="option-button" data-option="ticket">招募券</button>
                         <button class="option-button" data-option="coin">通宝</button>
+                    </div>
+                </div>
+
+                <!-- 祸乱类型表单 -->
+                <div class="form-section huoluan hidden">
+                    <h4>关卡名（仅限一项）</h4>
+                    <div class="option-buttons" data-group="stage">
+                        <button class="option-button" data-option="S1">地有四难</button>
+                        <button class="option-button" data-option="S2">忘形</button>
+                        <button class="option-button" data-option="S3">奇谭</button>
+                        <button class="option-button" data-option="S4">破局</button>
+                        <button class="option-button" data-option="S5">凭器</button>
+                        <button class="option-button" data-option="S6">贪妄</button>
+                        <button class="option-button" data-option="S7">不鉴</button>
+                        <button class="option-button" data-option="S8">靡靡之音</button>
+                        <button class="option-button" data-option="S9">愠怒</button>
+                        <button class="option-button" data-option="S10">迷惘</button>
+                    </div>
+
+                    <h4 class="variant-title hidden">变体（仅限一项）</h4>
+                    <div class="variant-buttons" data-group="variant">
+                        <!-- 变体选项将通过JavaScript动态生成 -->
                     </div>
                 </div>
 

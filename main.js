@@ -66,6 +66,50 @@ document.addEventListener("DOMContentLoaded", function () {
         blank: "无",
     };
 
+    const huoluanStage = {
+        S1: {
+            name: "地有四难",
+            variants: ["四奖励一敌人", "一隐藏四敌人（刺箱）"]
+        },
+        S2: {
+            name: "忘形",
+            variants: ["得意 + 飞天马桶", "魂灵涡流 + 萨科塔"]
+        },
+        S3: {
+            name: "奇谭",
+            variants: ["弹药敌人", "动力装甲"]
+        },
+        S4: {
+            name: "破局",
+            variants: ["飞天马桶", "萨科塔"]
+        },
+        S5: {
+            name: "凭器",
+            variants: ["飞天马桶 + 圣杯", "倾轧者 + 沙滩车", "萨卡兹 + 赏金猎人（减费）"]
+        },
+        S6: {
+            name: "贪妄",
+            variants: ["食人花"]
+        },
+        S7: {
+            name: "不鉴",
+            variants: ["腐败 + 凋零骑士", "刘关张"]
+        },
+        S8: {
+            name: "靡靡之音",
+            variants: ["巨像 + 颂偶", "骑士团精锐"]
+        },
+        S9: {
+            name: "愠怒",
+            variants: ["遗弃者 + 囚犯", "圣堂保育员 + 弹药敌人", "隐身狙 + 大锤"]
+        },
+        S10: {
+            name: "迷惘",
+            variants: ["刘关张 + 人间烟火", "遗忘战士 + 魂灵涡流"]
+        },
+
+    };
+
 
     // DOM元素
     const gridContainer = document.getElementById("grid-container");
@@ -292,6 +336,40 @@ document.addEventListener("DOMContentLoaded", function () {
                     // 保存当前选项
                     gridData[cellKey].formData.end = option;
                 }
+            }
+            // 祸乱类型的特殊处理
+            else if (gridData[cellKey].type === 'huoluan') {
+                // 如果选择了关卡名
+
+                if (group === 'stage') {
+                    // 清除同组其他选项的选中状态
+                    this.parentElement.querySelectorAll('.option-button').forEach(btn => {
+                        btn.classList.remove('selected');
+                    });
+
+                    // 删除已选变体
+                    delete gridData[cellKey].formData.variant
+
+                    // 保存当前选项
+                    gridData[cellKey].formData[group] = option;
+
+                    // 更新变体菜单
+                    updateVariantOptions(option, cellKey)
+                }
+
+                if (group === 'variant') {
+                    // 如果分组是变体
+
+                    // 清除同组其他选项的选中状态
+                    this.parentElement.querySelectorAll('.option-button').forEach(btn => {
+                        btn.classList.remove('selected');
+                    });
+
+                    // 保存当前选项
+                    gridData[cellKey].formData[group] = option;
+
+                }
+
             }
             // 其他类型的处理（保持原样）
             else {
@@ -779,6 +857,28 @@ document.addEventListener("DOMContentLoaded", function () {
                     }
                 }
                 break;
+
+            case 'huoluan':
+                if (cellData.formData?.stage) {
+                    const button = document.querySelector(`.form-section.huoluan [data-group="stage"] .option-button[data-option="${cellData.formData.stage}"]`);
+                    if (button) {
+                        button.classList.add('selected');
+                        button.style.setProperty('--current-color', "var(--huoluan-color)");
+
+                        // 更新变体选项
+                        updateVariantOptions(cellData.formData.stage, cellKey);
+
+                        // 如果有选中的变体，恢复选中状态
+                        if (cellData.formData.variant) {
+                            const variantButton = document.querySelector(`.form-section.huoluan [data-group="variant"] .option-button[data-option="${cellData.formData.variant}"]`);
+                            if (variantButton) {
+                                variantButton.classList.add('selected');
+                                variantButton.style.setProperty('--current-color', "var(--huoluan-color)");
+                            }
+                        }
+                    }
+                }
+                break;
         }
         // 显示对应的表单部分
         formSections.forEach((section) => {
@@ -912,7 +1012,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // 如果当前单元格有快捷菜单且正在显示，则更新菜单
         if (quickMenu.style.display === 'flex' &&
             currentCell === cell &&
-            ['changle', 'zayi', 'shiyi'].includes(cellData.type)) {
+            ['changle', 'zayi', 'shiyi', 'huoluan'].includes(cellData.type)) {
             const row = parseInt(cell.dataset.row);
             const col = parseInt(cell.dataset.col);
             const cellKey = `${row},${col}`;
@@ -1333,7 +1433,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         // 显示在下侧
         quickMenu.style.top = `${rect.top}px`;
-        
+
 
         const cellData = gridData[cellKey];
         const type = cellData.type;
@@ -1380,7 +1480,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
         // 根据单元格类型添加对应的选项按钮
-        if (['changle', 'zayi', 'shiyi'].includes(type)) {
+        if (['changle', 'zayi', 'shiyi', 'huoluan'].includes(type)) {
             // 获取对应类型的表单部分
             const formSection = document.querySelector(`.form-section.${type}`);
 
@@ -1415,7 +1515,27 @@ document.addEventListener("DOMContentLoaded", function () {
                     // 结局节点
                     const endButtons = formSection.querySelectorAll('[data-group="end"] .option-button');
                     addButtonsToQuickMenu(endButtons, "结局节点", cell, cellKey, cellData.formData?.end);
-                } else {
+
+                } else if (type === 'huoluan') {
+                    // 关卡选择
+                    const stageButtons = formSection.querySelectorAll('[data-group="stage"] .option-button');
+                    addButtonsToQuickMenu(stageButtons, "关卡选择", cell, cellKey, cellData.formData?.stage);
+
+                    // 如果有选中的关卡，显示变体选项
+                    if (cellData.formData?.stage) {
+                        const variantButtons = formSection.querySelectorAll('[data-group="variant"] .option-button');
+                        if (variantButtons.length > 0) {
+                            // 添加分割线
+                            const divider = document.createElement('div');
+                            divider.className = 'quick-menu-divider';
+                            subQmenu.appendChild(divider);
+
+                            addButtonsToQuickMenu(variantButtons, "变体选择", cell, cellKey, cellData.formData?.variant);
+                        }
+                    }
+                }
+
+                else {
                     // 其他类型正常处理
                     const optionButtons = formSection.querySelectorAll('.option-button');
                     const selectedOption = cellData.formData?.[type];
@@ -1464,6 +1584,51 @@ document.addEventListener("DOMContentLoaded", function () {
 
         document.addEventListener('mousemove', checkMenuClose);
     }
+
+    // 辅助函数：更新祸乱变体选项的函数
+    function updateVariantOptions(stageKey, cellKey) {
+        const variantSection = document.querySelector('.form-section.huoluan .variant-buttons');
+        const variantTitle = document.querySelector('.form-section.huoluan .variant-title');
+
+        // 清除旧选项
+        variantSection.innerHTML = '';
+
+        // 如果有选中的关卡，显示变体选项
+        if (stageKey && huoluanStage[stageKey]) {
+            variantTitle.classList.remove('hidden');
+
+            huoluanStage[stageKey].variants.forEach((variant, index) => {
+                const button = document.createElement('button');
+                button.className = 'option-button';
+                button.dataset.option = `V${index + 1}`;
+                button.textContent = variant;
+                button.style.setProperty('--current-color', "var(--huoluan-color)");
+
+                // 如果之前已经选中了这个变体，恢复选中状态
+                if (gridData[cellKey]?.formData?.variant === `V${index + 1}`) {
+                    button.classList.add('selected');
+                }
+
+                button.addEventListener('click', function () {
+                    // 清除同组其他选项的选中状态
+                    this.parentElement.querySelectorAll('.option-button').forEach(btn => {
+                        btn.classList.remove('selected');
+                    });
+
+                    // 设置当前按钮为选中状态
+                    this.classList.add('selected');
+
+                    // 保存当前选项
+                    gridData[cellKey].formData.variant = this.dataset.option;
+                });
+
+                variantSection.appendChild(button);
+            });
+        } else {
+            variantTitle.classList.add('hidden');
+        }
+    }
+
     // 辅助函数：添加按钮到快捷菜单
     function addButtonsToQuickMenu(buttons, groupTitle, cell, cellKey, selectedOption) {
         const subQmenu = document.querySelector(`.quick-menu-subs`)
@@ -1478,6 +1643,18 @@ document.addEventListener("DOMContentLoaded", function () {
             subQmenu.appendChild(title);
         }
 
+        // 设置按钮背景色
+        const typeColors = {
+            huoluan: "var(--huoluan-color)",
+            chuanshuo: "var(--chuanshuo-color)",
+            zayi: "var(--zayi-color)",
+            gusi: "var(--gusi-color)",
+            changle: "var(--changle-color)",
+            choumou: "var(--choumou-color)",
+            shiyi: "var(--shiyi-color)",
+            yiyu: "var(--yiyu-color)"
+        };
+
         buttons.forEach(button => {
             const quickButton = document.createElement('button');
             quickButton.className = 'quick-menu-button';
@@ -1487,17 +1664,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const option = button.dataset.option;
             const isSelected = selectedOption === option;
 
-            // 设置按钮背景色
-            const typeColors = {
-                huoluan: "var(--huoluan-color)",
-                chuanshuo: "var(--chuanshuo-color)",
-                zayi: "var(--zayi-color)",
-                gusi: "var(--gusi-color)",
-                changle: "var(--changle-color)",
-                choumou: "var(--choumou-color)",
-                shiyi: "var(--shiyi-color)",
-                yiyu: "var(--yiyu-color)"
-            };
+
             const cellType = gridData[cellKey].type;
             const baseColor = typeColors[cellType] || "var(--unknown-color)";
 
@@ -1619,6 +1786,36 @@ document.addEventListener("DOMContentLoaded", function () {
         else if (type === 'shiyi' && cellData.formData.shiyi) {
             icons.push(cellData.formData.shiyi);
         }
+        else if (type === 'huoluan'&& cellData.formData.stage) {
+            // {stage: 'S3', variant: 'V2'}
+            // 关卡名:
+            const stage = `${huoluanStage[cellData.formData.stage].name}`
+            let mark = ``
+
+            if (cellData.formData.variant){
+                // 如果有变体选项
+                const variant = huoluanStage[cellData.formData.stage].variants[parseInt(cellData.formData.variant.substring(1), 10)-1];                
+                mark = `huoluan_${stage}-${variant[0]}`;
+
+            } else {
+
+                mark = `huoluan_${stage}`;
+            }
+
+            icons.push(mark)
+
+            
+            // 祸乱类型显示关卡和变体
+            // 当选中祸乱关卡时，在右上角显示关卡名。当同时选中变体时，增加显示1,2……
+            // 如只选中“地有四难”时，显示p: 地有四难
+            // 选中地有四难和变体“四奖励一敌人”时，显示p: 地有四难-四（变体名的第一个字）
+            // 数据来自const huoluanStage = {
+            //S1: {
+            //    name: "地有四难",
+            //    variants: ["四奖励一敌人", "一隐藏四敌人（刺箱）"]
+            //},
+            
+        } 
 
         // 如果有需要显示的图标
         if (icons.length > 0) {
@@ -1630,6 +1827,14 @@ document.addEventListener("DOMContentLoaded", function () {
                     const badge = document.createElement('div');
                     badge.className = 'cell-badge';
                     badge.innerHTML = RewardIcons[iconName];
+                    badgeContainer.appendChild(badge);
+
+                }else if(iconName.includes('huoluan_')){
+
+                    // 显示祸乱字符串
+                    const badge = document.createElement('div');
+                    badge.className = 'cell-badge-text';
+                    badge.innerHTML = iconName.substring(8) // 删去huoluan_
                     badgeContainer.appendChild(badge);
                 }
             });
