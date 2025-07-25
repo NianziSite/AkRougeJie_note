@@ -1039,7 +1039,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 })
                 .catch((error) => {
                     console.error("识别失败:", error);
-                    alert(("识别失败: " + error.message || "未知错误") + "\n请尽量确保截图只包含地图节点，而不包含游戏界面。（参照示例图）");
+                    alert(("识别失败: " + error.message || "未知错误") + "\n\n请尽量确保截图只包含地图节点，而不包含游戏界面。（参照示例图）");
                 });
         });
 
