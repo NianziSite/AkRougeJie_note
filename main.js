@@ -1789,13 +1789,13 @@ document.addEventListener("DOMContentLoaded", function () {
         else if (type === 'huoluan'&& cellData.formData.stage) {
             // {stage: 'S3', variant: 'V2'}
             // 关卡名:
-            const stage = `${huoluanStage[cellData.formData.stage].name}`
+            const stage = `${huoluanStage[cellData.formData.stage].name[0]}`
             let mark = ``
 
             if (cellData.formData.variant){
                 // 如果有变体选项
                 const variant = huoluanStage[cellData.formData.stage].variants[parseInt(cellData.formData.variant.substring(1), 10)-1];                
-                mark = `huoluan_${stage}-${variant[0]}`;
+                mark = `huoluan_${stage}/${variant[0]}`;
 
             } else {
 
@@ -1807,8 +1807,8 @@ document.addEventListener("DOMContentLoaded", function () {
             
             // 祸乱类型显示关卡和变体
             // 当选中祸乱关卡时，在右上角显示关卡名。当同时选中变体时，增加显示1,2……
-            // 如只选中“地有四难”时，显示p: 地有四难
-            // 选中地有四难和变体“四奖励一敌人”时，显示p: 地有四难-四（变体名的第一个字）
+            // 如只选中“地有四难”时，显示p: 地
+            // 选中地有四难和变体“四奖励一敌人”时，显示p: 地/四（第一个字）
             // 数据来自const huoluanStage = {
             //S1: {
             //    name: "地有四难",
