@@ -173,9 +173,9 @@
             bottom: 2px;
             width: 100%;
         }
-        
+
         .blank .grid-label,
-        .unknown .grid-label{
+        .unknown .grid-label {
             color: #bcbcbc;
         }
 
@@ -653,7 +653,7 @@
         .yanchecker-container {
             position: relative;
             display: inline-block;
-            
+
         }
 
         .yanchecker-toggle-btn {
@@ -950,9 +950,9 @@
         鼠标<b>拖拽</b>可以在节点之间绘制连接点，反向拖拽可以删除。
         <br />鼠标<b>右键</b>可以切换节点开关状态。以及快捷关闭打开的菜单。<br />
         鼠标<b>滚轮</b>可以切换节点类型。<br />
-        点击节点可以编辑节点类型或者记笔记。在笔记框内粘贴图片可以记录截图。<br />
+        点击节点可以编辑节点类型或者记笔记。在笔记框内粘贴图片可以记录截图。星号可以标记关注的节点。<br />
         <b>“识别地图输入”</b>可以识别地图截图，勾选<b>“保留数据”</b>“可以在道中更新节点类型而不影响已记录的信息。<br>
-        <span style="color: green">v1.3：增加烛火记录、炎国干员速查、优化了悬浮菜单、优化了部分体验</span>
+        <span style="color: green">v1.4：增加节点收藏、祸乱节点标记、视觉尺寸优化</span>
     </p>
     <p style="color: orangered">
         已知bug：截图过小时识别效果不佳，不建议在过小的窗口里截图。<br />识别图片功能运行开销较大，电脑风扇会狂转。
@@ -1399,7 +1399,7 @@
                 截图快捷键：Win+Shift+S，截图后按Ctrl+V粘贴<br />
                 <span style="color: red" id="no-preserve-hint">您未勾选“保留数据”，已填写数据会被覆盖</span>
                 <span style="color: green" id="preserve-hint">您已勾选“保留数据”，已填写数据会被保留，只有节点类型会改变</span>
-            </div>            
+            </div>
 
             <div class="image-upload">
                 <div class="image-preview" id="recmap-preview"></div>
@@ -1409,9 +1409,9 @@
                     识别并应用
                 </button>
                 <button class="reset-button" id="cancel-recmap">取消</button>
-            </div>           
+            </div>
 
-            
+
         </div>
 
         <!-- 快捷菜单 -->
@@ -1430,7 +1430,9 @@
             图标及识别模板（除特殊声明外）来自鹰角网络旗下游戏《明日方舟》，本工具不拥有任何相关权利。<br />
             作者不对本工具内任何代码主张署名以外的权利，您可以随意使用或者改写，但请标注来源。我不对您的任何用途及后果承担责任。
         </p>
-        <p>项目地址：<a href="https://github.com/NianziSite/AkRougeJie_note">github</a></p>
+        <p>项目地址：<a href="https://github.com/NianziSite/AkRougeJie_note">github项目</a> | <a href="https://nianzisite.github.io/AkRougeJie_note/">github pages（在线使用）</a> | <a
+            href="https://ark.yituliu.cn/tools/sui">明日方舟一图流（在线使用）</a></p>
+        <p>github pages总是保持在最新版本，这也意味着您可能碰到尚未解决的bug。</p>
 
     </div>
 
@@ -1447,17 +1449,22 @@
 
         </p>
         <p><b>NGA@zyc06</b>：实现了右键快捷关闭功能。</p>
-        <p>github@SambacFeng：调整了视觉体验</p>
+        <p><b>github@SambacFeng</b>：调整了视觉体验</p>
 
         <h3>Changelog</h3>
+        <h4>v1.4</h4>
+        <p>- 优化悬停菜单位置逻辑</p>
+        <p>- 增加格点收藏功能</p>
+        <p>- 增加祸乱节点及其变体的记录</p>
+        <p>- 调整视觉体验，扩大了界面尺寸（部分感谢github@SambacFeng）</p>
 
-        <h4>v1.3</h4>
-        <p>- 增加炎国干员速查</p>
-        <p>- 增加烛火记录</p>
-        <p>- 完善了悬浮菜单</p>
-        <p>- 优化了部分功能和视觉效果</p>
         <details>
             <summary>此前的版本</summary>
+            <h4>v1.3</h4>
+            <p>- 增加炎国干员速查</p>
+            <p>- 增加烛火记录</p>
+            <p>- 完善了悬浮菜单</p>
+            <p>- 优化了部分功能和视觉效果</p>
             <h4>v1.2</h4>
             <p>- 交互功能优化，现在可以利用滚轮、右键快捷编辑，（感谢森空岛@伊万德）</p>
             <p>- 参照NGA@Hoshino星夜的建议调整了滚轮菜单顺序，让更常见的节点靠前。</p>
