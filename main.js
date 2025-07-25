@@ -940,6 +940,9 @@ document.addEventListener("DOMContentLoaded", function () {
                     "var(--unknown-color)"
                 );
             }
+            
+            // 触发自动保存
+            triggerAutoSave();
         }
     }
 
