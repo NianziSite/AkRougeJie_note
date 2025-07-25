@@ -10,8 +10,8 @@
             --bg-color: #1a1a1a;
             --bg-color2: #242424;
             --grid-bg: #2d2d2d;
-            --grid-size: 56px;
-            --grid-gap: 24px;
+            --grid-size: 84px;
+            --grid-gap: 36px;
             --line-color: #ff6b9e;
             --line-color-unknown: #6e6e6e;
             --text-color: #e0e0e0;
@@ -62,7 +62,7 @@
             display: none;
             gap: 16px;
             align-items: center;
-            font-size: small;
+            font-size: 16px;
         }
 
         .grid-container {
@@ -148,8 +148,8 @@
         }
 
         .grid-icon {
-            width: 30px;
-            height: 30px;
+            width: 42px;
+            height: 42px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -166,13 +166,20 @@
         }
 
         .grid-label {
-            font-size: 11px;
+            font-size: 14px;
             color: white;
             text-align: center;
             position: absolute;
             bottom: 2px;
             width: 100%;
         }
+        
+        .blank .grid-label,
+        .unknown .grid-label{
+            color: #bcbcbc;
+        }
+
+
 
         .grid {
             user-select: none;
@@ -191,13 +198,13 @@
         }
 
         .connection.horizontal {
-            height: 8px;
-            transform: translateY(calc(var(--grid-size) / 2 - 4px));
+            height: 16px;
+            transform: translateY(calc(var(--grid-size) / 2 - 8px));
         }
 
         .connection.vertical {
-            width: 8px;
-            transform: translateX(calc(var(--grid-size) / 2 - 4px));
+            width: 16px;
+            transform: translateX(calc(var(--grid-size) / 2 - 8px));
         }
 
         .popup {
@@ -241,7 +248,7 @@
         .popup label {
             display: block;
             margin-bottom: 8px;
-            font-size: 14px;
+            font-size: 16px;
         }
 
         .popup input[type="text"],
@@ -260,6 +267,7 @@
         .popup textarea {
             min-height: 40px;
             resize: vertical;
+            font-size: 16px;
         }
 
         .type-buttons {
@@ -274,7 +282,7 @@
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 16px;
             color: white;
         }
 
@@ -351,7 +359,7 @@
             padding: 6px 12px;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 16px;
             margin-bottom: 12px;
         }
 
@@ -361,7 +369,7 @@
         }
 
         .buttons label {
-            font-size: small;
+            font-size: 16px;
         }
 
         .reset-button {
@@ -459,7 +467,7 @@
 
         .image-preview {
             max-width: 100%;
-            max-height: 200px;
+            /*max-height: 200px;*/
             margin-top: 10px;
             border: 1px dashed #666;
             border-radius: 4px;
@@ -471,19 +479,20 @@
             display: block;
         }
 
+        summary,
         p {
-            font-size: 12px;
+            font-size: 16px;
             color: #999;
         }
 
         .paste-hint {
-            font-size: 12px;
+            font-size: 16px;
             color: #999;
             margin-top: 5px;
         }
 
         #recmap-popup {
-            width: 300px;
+            width: 560px;
             height: auto;
             padding: 20px;
             left: 50%;
@@ -544,7 +553,7 @@
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 16px;
             background-color: #444;
             color: white;
         }
@@ -565,7 +574,7 @@
             flex-direction: column;
             gap: 4px;
             min-width: 120px;
-            width: 240px;
+            width: 320px;
         }
 
         .quick-menu-button {
@@ -573,7 +582,7 @@
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 16px;
             color: white;
             text-align: left;
             background-color: #444;
@@ -607,14 +616,14 @@
             flex-wrap: wrap;
             justify-content: flex-end;
             gap: 2px;
-            max-width: 40px;
+            /*max-width: 40px;*/
             /* 限制最大宽度，防止溢出 */
             pointer-events: none;
         }
 
         .cell-badge {
-            width: 16px;
-            height: 16px;
+            width: 20px;
+            height: 20px;
             flex-shrink: 0;
         }
 
@@ -625,7 +634,8 @@
         }
 
         .cell-badge-text {
-            font-size: small;
+            font-size: 14px;
+            font-weight: bold;
         }
 
         #preserve-data:checked+.slider {
@@ -643,6 +653,7 @@
         .yanchecker-container {
             position: relative;
             display: inline-block;
+            
         }
 
         .yanchecker-toggle-btn {
@@ -652,14 +663,14 @@
             cursor: pointer;
             padding: none;
             font-weight: bold;
-
+            font-size: 20px;
         }
 
         .yanchecker-card {
             position: absolute;
             top: 100%;
             right: 0;
-            width: 540px;
+            width: 720px;
             max-width: 90vw;
             background-color: var(--bg-color2);
             border-radius: 8px;
@@ -667,6 +678,7 @@
             padding: 16px;
             z-index: 1000;
             display: none;
+            font-size: 20px;
         }
 
         .yanchecker-card-header {
@@ -677,14 +689,14 @@
         }
 
         .yanchecker-card-title {
-            font-size: 18px;
+            font-size: 24px;
             font-weight: bold;
         }
 
         .yanchecker-close-btn {
             background: none;
             border: none;
-            font-size: 20px;
+            font-size: 24px;
             cursor: pointer;
             color: #999;
         }
@@ -715,6 +727,7 @@
             color: white;
             border-radius: 4px;
             cursor: pointer;
+            font-size: 16px;
         }
 
         .yanchecker-filter-btn.active {
@@ -725,7 +738,7 @@
         .yanchecker-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: small;
+            font-size: 16px;
         }
 
         .yanchecker-table th,
@@ -780,7 +793,7 @@
         /* 固定首列宽度 */
         .yanchecker-table td:first-child,
         .yanchecker-table th:first-child {
-            width: 30px;
+            width: 48px;
             position: sticky;
             left: 0;
             z-index: 2;
@@ -806,7 +819,7 @@
 
         .candle-value h2 {
             margin: 0;
-            font-size: small;
+            font-size: 20px;
             color: var(--yan-color);
         }
 
@@ -816,7 +829,7 @@
             border: none;
             border-bottom: 1px solid #616161;
             color: #ffffff;
-            font-size: 1.2rem;
+            font-size: 24px;
             text-align: center;
             font-weight: bold;
             padding: 5px 0;
@@ -829,12 +842,12 @@
 
         .candle-value button {
             background-color: transparent;
-            color: white;
+            color: #ccc;
             border: none;
             border-radius: 2px;
-            padding: 4px 8px;
+            padding: 4px 12px;
             cursor: pointer;
-            font-size: small;
+            font-size: 20px;
             transition: background-color 0.3s;
         }
 
@@ -848,7 +861,7 @@
             min-height: 20px;
             /* 一行高度 */
             overflow: auto;
-            font-size: 12px;
+            font-size: 16px;
             padding: 8px;
             background-color: var(--bg-color2);
             margin-bottom: 4px;
@@ -861,20 +874,20 @@
         .quick-menu-note:empty::before {
             content: "在此输入笔记...";
             color: #565656;
-            font-size: small;
+            font-size: 16px;
         }
 
         .quick-menu-image-placeholder {
             width: 100%;
-            height: 40px;
+            height: 80px;
             background-color: #333;
             display: flex;
             align-items: center;
             justify-content: center;
             color: #999;
-            font-size: 12px;
+            font-size: 14px;
             border-radius: 4px;
-            margin-top: 4px;
+            margin-top: 8px;
             border: 1px dashed #555;
         }
 
@@ -902,18 +915,19 @@
             position: absolute;
             top: -4px;
             left: 0px;
-            width: 16px;
-            height: 16px;
+            width: 36px;
+            height: 36px;
             cursor: pointer;
             z-index: 10;
             opacity: 0;
             transition: opacity 0.2s;
+            font-size: 20px;
         }
 
         .cell-star.favorite {
             opacity: 1;
             color: gold;
-            filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.7));
+            /*filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.7));*/
         }
 
         .cell-star:hover {
@@ -1211,8 +1225,6 @@
                             </tr>
                         </tbody>
                     </table>
-
-                    <p><br><br></p>
                     <p>数据更新截止于2025.07.22界园肉鸽发布初期，并非实时更新，可能导致以上内容过时。</p>
 
                     <details>
@@ -1383,23 +1395,23 @@
                 请粘贴游戏地图的截图，点击确认后可能需要等待几秒，电脑cpu会狂转一会儿，因为目前的识别算法没有经过任何优化。<br /><b>确保截图内容只包含完整的地图部分，否则会识别失败</b>
             </p>
             <div class="example_img"><img src="example.png" /></div>
-
-            <div class="image-upload">
-                <div class="image-preview" id="recmap-preview"></div>
-            </div>
-
             <div class="paste-hint">
                 截图快捷键：Win+Shift+S，截图后按Ctrl+V粘贴<br />
                 <span style="color: red" id="no-preserve-hint">您未勾选“保留数据”，已填写数据会被覆盖</span>
                 <span style="color: green" id="preserve-hint">您已勾选“保留数据”，已填写数据会被保留，只有节点类型会改变</span>
-            </div>
+            </div>            
 
-            <div class="buttons" style="margin-top: 20px">
+            <div class="image-upload">
+                <div class="image-preview" id="recmap-preview"></div>
+            </div>
+            <div class="buttons">
                 <button class="recmap-button" id="confirm-recmap">
                     识别并应用
                 </button>
                 <button class="reset-button" id="cancel-recmap">取消</button>
-            </div>
+            </div>           
+
+            
         </div>
 
         <!-- 快捷菜单 -->
@@ -1435,6 +1447,7 @@
 
         </p>
         <p><b>NGA@zyc06</b>：实现了右键快捷关闭功能。</p>
+        <p>github@SambacFeng：调整了视觉体验</p>
 
         <h3>Changelog</h3>
 

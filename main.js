@@ -69,7 +69,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const huoluanStage = {
         S1: {
             name: "地有四难",
-            variants: ["四奖励一敌人", "一隐藏四敌人（刺箱）"]
+            variants: ["四奖励一敌人", "一奖励四敌人（刺箱）"]
         },
         S2: {
             name: "忘形",
@@ -93,7 +93,7 @@ document.addEventListener("DOMContentLoaded", function () {
         },
         S7: {
             name: "不鉴",
-            variants: ["腐败 + 凋零骑士", "刘关张"]
+            variants: ["腐败 + 凋零骑士", "三杰刘关张"]
         },
         S8: {
             name: "靡靡之音",
@@ -105,7 +105,7 @@ document.addEventListener("DOMContentLoaded", function () {
         },
         S10: {
             name: "迷惘",
-            variants: ["刘关张 + 人间烟火", "遗忘战士 + 魂灵涡流"]
+            variants: ["三杰刘关张 + 人间烟火", "遗忘战士 + 魂灵涡流"]
         },
 
     };
@@ -1789,13 +1789,13 @@ document.addEventListener("DOMContentLoaded", function () {
         else if (type === 'huoluan'&& cellData.formData.stage) {
             // {stage: 'S3', variant: 'V2'}
             // 关卡名:
-            const stage = `${huoluanStage[cellData.formData.stage].name[0]}`
+            const stage = `${huoluanStage[cellData.formData.stage].name.substring(0,2)}`
             let mark = ``
 
             if (cellData.formData.variant){
                 // 如果有变体选项
                 const variant = huoluanStage[cellData.formData.stage].variants[parseInt(cellData.formData.variant.substring(1), 10)-1];                
-                mark = `huoluan_${stage}/${variant[0]}`;
+                mark = `huoluan_${stage}/${variant.substring(0,2)}`;
 
             } else {
 
