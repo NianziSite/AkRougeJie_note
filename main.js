@@ -65,7 +65,7 @@ document.addEventListener("DOMContentLoaded", function () {
         choumou: "筹谋",
         blank: "无",
     };
-    
+
 
     // DOM元素
     const gridContainer = document.getElementById("grid-container");
@@ -124,6 +124,16 @@ document.addEventListener("DOMContentLoaded", function () {
                 label.textContent = "未知";
                 cell.appendChild(label);
 
+                // 添加星星元素
+                const star = document.createElement("div");
+                star.className = "cell-star";
+                star.innerHTML = "★";
+                star.addEventListener("click", function (e) {
+                    e.stopPropagation();
+                    toggleFavorite(cell);
+                });
+                cell.appendChild(star);
+
                 // 在这里定义 cellKey
                 const cellKey = `${r},${c}`;
                 gridData[cellKey] = {
@@ -131,6 +141,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     closed: false,
                     notes: "",
                     image: null,
+                    favorite: false // 格子收藏状态
                 };
 
                 // 设置起始点
@@ -203,6 +214,31 @@ document.addEventListener("DOMContentLoaded", function () {
             .querySelectorAll(".connection")
             .forEach((el) => el.remove());
     }
+
+    // 添加切换收藏状态的函数
+    function toggleFavorite(cell) {
+        const row = parseInt(cell.dataset.row);
+        const col = parseInt(cell.dataset.col);
+        const cellKey = `${row},${col}`;
+
+        if (gridData[cellKey]) {
+            gridData[cellKey].favorite = !gridData[cellKey].favorite;
+            updateStarAppearance(cell, gridData[cellKey].favorite);
+        }
+    }
+
+    // 更新星星显示状态的函数
+    function updateStarAppearance(cell, isFavorite) {
+        const star = cell.querySelector(".cell-star");
+        if (star) {
+            star.classList.toggle("favorite", isFavorite);
+            if (isFavorite) {
+                star.style.opacity = "1";
+            }
+        }
+    }
+
+
 
     // 处理选项按钮点击
     document.querySelectorAll('.option-button').forEach(button => {
@@ -822,6 +858,9 @@ document.addEventListener("DOMContentLoaded", function () {
         // 添加当前类型类
         cell.classList.add(cellData.type);
 
+        // 更新收藏星星状态
+        updateStarAppearance(cell, cellData.favorite);
+
         // 更新关闭状态
         if (cellData.closed) {
             cell.classList.add("closed");
@@ -1080,7 +1119,8 @@ document.addEventListener("DOMContentLoaded", function () {
                             closed: result.stats[r][c],
                             notes: "",
                             image: null,
-                            formData: {}
+                            formData: {},
+                            favorite: false
                         };
                     }
                 } else {
@@ -1090,7 +1130,8 @@ document.addEventListener("DOMContentLoaded", function () {
                         closed: result.stats[r][c],
                         notes: "",
                         image: null,
-                        formData: {}
+                        formData: {},
+                        favorite: false
                     };
                 }
 
@@ -1248,6 +1289,13 @@ document.addEventListener("DOMContentLoaded", function () {
         const col = parseInt(cell.dataset.col);
         const cellKey = `${row},${col}`;
 
+        // 确保星星在悬浮时可见
+        // FIXME: 感觉把收藏星星塞在这个函数里不太好
+        const star = cell.querySelector(".cell-star");
+        if (star && !star.classList.contains("favorite")) {
+            star.style.opacity = "0.5";
+        }
+
         if (!gridData[cellKey] || cell.classList.contains("start")) {
             return;
         }
@@ -1273,8 +1321,19 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // 设置菜单位置
         const rect = cell.getBoundingClientRect();
-        quickMenu.style.left = `${rect.right}px`;
+        const [row, col] = cellKey.split(',').map(Number); // 解析行列号
+
+        if (col >= 5) {
+            quickMenu.style.left = `${rect.left}px`;  // 对齐 cell 左边缘
+            quickMenu.style.transform = "translateX(-100%)";  // 向左移动自身宽度
+        } else {
+            // 默认显示在右侧
+            quickMenu.style.left = `${rect.right}px`;  // 对齐 cell 右边缘
+            quickMenu.style.transform = "none";  // 清除之前的 transform
+        }
+        // 显示在下侧
         quickMenu.style.top = `${rect.top}px`;
+        
 
         const cellData = gridData[cellKey];
         const type = cellData.type;
@@ -1301,7 +1360,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
         quickMenu.appendChild(noteSection);
 
-        
+
         // 添加焦点事件监听
         noteSection.addEventListener('focus', () => {
             isEditingNotes = true;
@@ -1488,6 +1547,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // 如果正在编辑笔记，则不隐藏菜单
         if (isEditingNotes) return;
+
+        // 恢复星星状态
+        const cell = e.currentTarget;
+        const star = cell.querySelector(".cell-star");
+        if (star && !star.classList.contains("favorite")) {
+            star.style.opacity = "0";
+        }
 
         // 只有当鼠标没有移动到菜单上时才设置延迟隐藏
         const relatedTarget = e.relatedTarget;

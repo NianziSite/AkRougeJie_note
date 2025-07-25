@@ -892,6 +892,35 @@
             flex-wrap: wrap;
             gap: 4px 8px
         }
+        /* 收藏星星 */
+        .cell-star {
+            position: absolute;
+            top: -4px;
+            left: 0px;
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .cell-star.favorite {
+            opacity: 1;
+            color: gold;
+            filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.7));
+        }
+
+        .cell-star:hover {
+            opacity: 1;
+        }
+
+        .grid-cell:hover .cell-star:not(.favorite) {
+            opacity: 0.5;
+            color: #ccc;
+        }
+        /* 收藏星星 - end */
+
     </style>
 </head>
 
@@ -909,7 +938,10 @@
     <p style="color: orangered">
         已知bug：截图过小时识别效果不佳，不建议在过小的窗口里截图。<br />识别图片功能运行开销较大，电脑风扇会狂转。
     </p>
-    
+    <p style="color: orangered">
+        IN_DEV: 如果你看见了这行字，说明现在是开发中版本，可能出现未预料到的bug
+    </p>
+
     <div class="main">
         <div class="controls">
             <details>
