@@ -40,7 +40,14 @@ document.addEventListener("DOMContentLoaded", function () {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
 
         } catch (error) {
-            console.warn('保存数据到本地存储失败:', error);
+            //储存空间报错
+            if (error.name === 'QuotaExceededError') {
+                console.warn('存储空间不足，尝试清理数据');
+                showExtraInfo('⚠ 空间不足，可能图片过多导致数据无法自动保存 ⚠');
+            } else {
+                console.warn('保存数据到本地存储失败:', error);
+                showExtraInfo(`⚠ 保存数据到本地存储失败: ${error} ⚠`);
+            }
         }
     }
 
@@ -1184,20 +1191,69 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const reader = new FileReader();
         reader.onload = function (e) {
-            const [row, col] = cellKey.split(",");
-            const previewId = `image-preview-${row}-${col}`;
-            const imagePreview = document.getElementById(previewId);
+            // 压缩图片
+            compressImage(e.target.result, 0.7, function (compressedDataUrl) {
+                const [row, col] = cellKey.split(",");
+                const previewId = `image-preview-${row}-${col}`;
+                const imagePreview = document.getElementById(previewId);
 
-            if (imagePreview) {
-                imagePreview.style.display = "block";
-                imagePreview.innerHTML = `<img src="${e.target.result}">`;
+                if (imagePreview) {
+                    imagePreview.style.display = "block";
+                    imagePreview.innerHTML = `<img src="${compressedDataUrl}">`;
 
-                // 保存数据
-                if (!gridData[cellKey]) gridData[cellKey] = {};
-                gridData[cellKey].image = e.target.result;
-            }
+                    
+                    // 保存压缩后的数据
+                    if (!gridData[cellKey]) gridData[cellKey] = {};
+                    gridData[cellKey].image = compressedDataUrl;
+
+
+
+                    // 触发自动保存
+                    triggerAutoSave();
+                }
+            });
         };
         reader.readAsDataURL(file);
+    }
+    // 新增图片压缩函数
+    function compressImage(src, quality, callback) {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+
+        img.onload = function () {
+            // 设置最大宽度和高度以进一步减小文件大小
+            const maxWidth = 1024;
+            const maxHeight = 960;
+            let width = img.width;
+            let height = img.height;
+
+            // 按比例缩放
+            if (width > height) {
+                if (width > maxWidth) {
+                    height = Math.round((height *= maxWidth / width));
+                    width = maxWidth;
+                }
+            } else {
+                if (height > maxHeight) {
+                    width = Math.round((width *= maxHeight / height));
+                    height = maxHeight;
+                }
+            }
+
+            // 设置canvas尺寸
+            canvas.width = width;
+            canvas.height = height;
+
+            // 在canvas上绘制图片
+            ctx.drawImage(img, 0, 0, width, height);
+
+            // 转换为base64并调用回调函数
+            const dataUrl = canvas.toDataURL('image/jpeg', quality);
+            callback(dataUrl);
+        };
+
+        img.src = src;
     }
 
     // 保存单元格数据
@@ -1849,9 +1905,15 @@ document.addEventListener("DOMContentLoaded", function () {
                     const file = items[i].getAsFile();
                     const reader = new FileReader();
                     reader.onload = function (e) {
-                        gridData[cellKey].image = e.target.result;
+                        // 压缩图片
+                        compressImage(e.target.result, 0.7, function (compressedDataUrl) {
+                            gridData[cellKey].image = compressedDataUrl;
                         imageContainer.className = 'quick-menu-image';
-                        imageContainer.innerHTML = `<img src="${e.target.result}">`;
+                        imageContainer.innerHTML = `<img src="${compressedDataUrl}">`;                        
+
+                        });
+                        
+                        
                     };
                     reader.readAsDataURL(file);
                     e.preventDefault();
