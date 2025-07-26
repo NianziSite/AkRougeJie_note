@@ -1483,6 +1483,9 @@ document.addEventListener("DOMContentLoaded", function () {
                         // 根据识别结果更新网格
                         updateGridFromRecognition(recognitionResult);
 
+                        // 自动储存
+                        triggerAutoSave();
+
                         // 关闭弹窗
                         document
                             .getElementById("recmap-popup")
