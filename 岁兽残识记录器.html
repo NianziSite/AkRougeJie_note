@@ -16,7 +16,7 @@
             --line-color-unknown: #6e6e6e;
             --text-color: #e0e0e0;
             --unknown-color: #3d3d3d;
-            --closed-color: #9f9f9f;
+            --closed-color: #1c1c1c;
             --huoluan-color: #cf48be;
             --chuanshuo-color: #008a7f;
             --zayi-color: #008a7f;
@@ -133,15 +133,22 @@
         .grid-cell.yiyu {
             background-color: var(--yiyu-color);
         }
-
+        
+        
         .grid-cell.closed {
-            opacity: 0.8;
-            filter: grayscale(70%);
+            background-color: var(--closed-color) !important;   
+            border: 1px solid #404040
+            /*回滚了已关闭节点的视觉效果，格子如果有不透明度会把底部连线露出*/
+            /*弱化颜色：直接修改了--closed-color*/
+        }
+
+        .grid-cell.closed .grid-label,
+        .grid-cell.closed .grid-icon{
+            opacity: 0.3 !important;
         }
 
         .grid-cell.start {
             background-color: --bg-color;
-            box-shadow: 0 0 0 3px #ffffff;
         }
 
         .grid-cell.blank {
