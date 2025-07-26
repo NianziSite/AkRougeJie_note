@@ -133,17 +133,17 @@
         .grid-cell.yiyu {
             background-color: var(--yiyu-color);
         }
-        
-        
+
+
         .grid-cell.closed {
-            background-color: var(--closed-color) !important;   
+            background-color: var(--closed-color) !important;
             border: 1px solid #404040
-            /*回滚了已关闭节点的视觉效果，格子如果有不透明度会把底部连线露出*/
-            /*弱化颜色：直接修改了--closed-color*/
+                /*回滚了已关闭节点的视觉效果，格子如果有不透明度会把底部连线露出*/
+                /*弱化颜色：直接修改了--closed-color*/
         }
 
         .grid-cell.closed .grid-label,
-        .grid-cell.closed .grid-icon{
+        .grid-cell.closed .grid-icon {
             opacity: 0.3 !important;
         }
 
@@ -947,7 +947,20 @@
             color: #ccc;
         }
 
-        /* 收藏星星 - end */
+        /* 添加单次闪烁动画关键帧 */
+        @keyframes flashOnce {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 
@@ -960,7 +973,6 @@
         鼠标<b>滚轮</b>可以切换节点类型。<br />
         点击节点可以编辑节点类型或者记笔记。在笔记框内粘贴图片可以记录截图。星号可以标记关注的节点。<br />
         <b>“识别地图输入”</b>可以识别地图截图，勾选<b>“保留数据”</b>“可以在道中更新节点类型而不影响已记录的信息。<br>
-        <span style="color: green">v1.4：增加节点收藏、祸乱节点标记、视觉尺寸优化</span><br>
         <span style="color: green">v1.5：增加自动保存和恢复历史数据功能</span>
     </p>
     <p style="color: orangered">
@@ -1252,6 +1264,9 @@
         <div class="grid-container" id="grid-container">
             <div class="grid" id="grid"></div>
         </div>
+
+        <p class="ex-info" style="font-size: small;">占位内容</p>
+
         <div class="buttons">
             <div class="recmap-btn-group">
                 <button class="recmap-button" id="recmap-button">
@@ -1436,8 +1451,9 @@
             图标及识别模板（除特殊声明外）来自鹰角网络旗下游戏《明日方舟》，本工具不拥有任何相关权利。<br />
             作者不对本工具内任何代码主张署名以外的权利，您可以随意使用或者改写，但请标注来源。我不对您的任何用途及后果承担责任。
         </p>
-        <p>项目地址：<a href="https://github.com/NianziSite/AkRougeJie_note">github项目</a> | <a href="https://nianzisite.github.io/AkRougeJie_note/">github pages（在线使用）</a> | <a
-            href="https://ark.yituliu.cn/tools/sui">明日方舟一图流（在线使用）</a></p>
+        <p>项目地址：<a href="https://github.com/NianziSite/AkRougeJie_note">github项目</a> | <a
+                href="https://nianzisite.github.io/AkRougeJie_note/">github pages（在线使用）</a> | <a
+                href="https://ark.yituliu.cn/tools/sui">明日方舟一图流（在线使用）</a></p>
         <p>github pages总是保持在最新版本，这也意味着您可能碰到尚未解决的bug。</p>
 
     </div>

@@ -38,6 +38,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 timestamp: new Date().toISOString(),
             };
             localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
+            
         } catch (error) {
             console.warn('保存数据到本地存储失败:', error);
         }
@@ -162,23 +163,37 @@ document.addEventListener("DOMContentLoaded", function () {
             const saveTime = new Date(savedData.timestamp);
             const timeStr = saveTime.toLocaleString('zh-CN');
             
-            const shouldRestore = confirm(
+            /*const shouldRestore = confirm(
                 `检测到本地保存的进度数据（保存时间：${timeStr}）\n\n是否要恢复上次的进度？\n\n点击"确定"恢复进度，点击"取消"开始新的记录。`
-            );
+            );*/
+
+            // 修改为总是自动更新已储存数据：
+
             
-            if (shouldRestore) {
-                const restored = restoreData(savedData);
-                if (restored) {
-                    showTemporaryMessage('✓ 已恢复历史进度', 'success');
-                } else {
-                    showTemporaryMessage('⚠ 恢复历史进度失败，将开始新的记录', 'warning');
-                }
+            
+            
+            const restored = restoreData(savedData);
+            if (restored) {
+                showTemporaryMessage('✓ 已恢复历史进度', 'success');
+                showExtraInfo(`已读取本地保存的进度：（保存时间：${timeStr}）`)
             } else {
-                // 用户选择不恢复，清除旧数据
-                clearLocalStorage();
-                showTemporaryMessage('已开始新的记录', 'info');
+                showTemporaryMessage('⚠ 恢复历史进度失败，将开始新的记录', 'warning');
+                showExtraInfo(` --- 暂无已保存进度 ---`)
             }
+            
         }
+    }
+    function showExtraInfo(message) {
+        // 显示额外信息
+        const extraInfo = document.querySelector('.ex-info')
+        
+        extraInfo.innerHTML = ''
+        extraInfo.innerHTML = message
+        extraInfo.style.animation = 'flashOnce 0.5s ease-in';
+        setTimeout(() => {
+            extraInfo.style.animation = '';
+        }, 500);
+        
     }
 
     // 消息通知，显示临时消息
@@ -228,6 +243,9 @@ document.addEventListener("DOMContentLoaded", function () {
     function triggerAutoSave() {
         clearTimeout(window.autoSaveTimeout);
         window.autoSaveTimeout = setTimeout(saveToLocalStorage, 500);
+
+        const timeStr = new Date().toLocaleString('zh-CN');
+        showExtraInfo(`数据自动保存：${timeStr}`)
     }
 
     // 使用本地数据时更新格子类型的辅助函数
@@ -1333,6 +1351,7 @@ document.addEventListener("DOMContentLoaded", function () {
             initializeGrid(rows, cols, startRow, startCol);
             
             showTemporaryMessage('已重置所有数据', 'info');
+            showExtraInfo(`--- 暂无已保存记录 ---`)
         }
     });
 
@@ -1715,6 +1734,7 @@ document.addEventListener("DOMContentLoaded", function () {
         noteSection.addEventListener('input', function () {
             // 实时保存笔记内容
             gridData[cellKey].notes = this.textContent;
+            triggerAutoSave()
         });
         quickMenu.appendChild(noteSection);
 
