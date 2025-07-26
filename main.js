@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // =============== 本地存储功能 START ===============
     const STORAGE_KEY = 'akrougejie_map_data';
-    
+
     // 保存数据到本地存储
     function saveToLocalStorage() {
         try {
@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 timestamp: new Date().toISOString(),
             };
             localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
-            
+
         } catch (error) {
             console.warn('保存数据到本地存储失败:', error);
         }
@@ -80,23 +80,23 @@ document.addEventListener("DOMContentLoaded", function () {
             const cols = data.gridConfig?.cols || 7;
             const startRow = data.gridConfig?.startRow || 3;
             const startCol = data.gridConfig?.startCol || 4;
-            
+
             initializeGrid(rows, cols, startRow, startCol);
 
             // 恢复网格数据
             if (data.gridData) {
                 gridData = data.gridData;
-                
+
                 // 更新每个格子的显示
                 Object.keys(gridData).forEach(cellKey => {
                     const [row, col] = cellKey.split(',').map(Number);
                     const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
                     if (cell && gridData[cellKey]) {
                         const cellData = gridData[cellKey];
-                        
+
                         // 更新格子类型
                         updateCellType(cell, cellData.type);
-                        
+
                         // 更新关闭状态
                         if (cellData.closed) {
                             cell.classList.add('closed');
@@ -140,13 +140,29 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // 检查gridData是否所有元素type都是unknown
-    function isAllGridDataUnknown(gridData) {
+    /*function isAllGridDataUnknown(gridData) {
         if (!gridData || Object.keys(gridData).length === 0) {
             return false; // 空数据不算all unknown
         }
-        
-        return Object.values(gridData).every(cellData => 
+
+        return Object.values(gridData).every(cellData =>
             cellData && cellData.type === 'unknown'
+        );
+    }*/
+
+    // 检查gridData是否所有元素都处于初始状态
+    function isAllGridDataInInitialState(gridData) {
+        if (!gridData || Object.keys(gridData).length === 0) {
+            return true; // 空数据算全部初始状态
+        }
+
+        return Object.values(gridData).every(cellData =>
+            cellData &&
+            cellData.type === 'unknown' &&
+            cellData.closed === false &&
+            cellData.notes === '' &&
+            cellData.image === null &&
+            cellData.favorite === false
         );
     }
 
@@ -154,24 +170,24 @@ document.addEventListener("DOMContentLoaded", function () {
     function checkForHistoryData() {
         const savedData = loadFromLocalStorage();
         if (savedData && savedData.timestamp) {
-            // 检查是否所有gridData的type都是unknown，如果是则不使用历史数据
-            if (savedData.gridData && isAllGridDataUnknown(savedData.gridData)) {
+            // 检查是否所有gridData都处于初始状态，如果是则不使用历史数据
+            if (savedData.gridData && isAllGridDataInInitialState(savedData.gridData)) {
                 clearLocalStorage();
                 return;
             }
-            
+
             const saveTime = new Date(savedData.timestamp);
             const timeStr = saveTime.toLocaleString('zh-CN');
-            
+
             /*const shouldRestore = confirm(
                 `检测到本地保存的进度数据（保存时间：${timeStr}）\n\n是否要恢复上次的进度？\n\n点击"确定"恢复进度，点击"取消"开始新的记录。`
             );*/
 
             // 修改为总是自动更新已储存数据：
 
-            
-            
-            
+
+
+
             const restored = restoreData(savedData);
             if (restored) {
                 showTemporaryMessage('✓ 已恢复历史进度', 'success');
@@ -180,20 +196,20 @@ document.addEventListener("DOMContentLoaded", function () {
                 showTemporaryMessage('⚠ 恢复历史进度失败，将开始新的记录', 'warning');
                 showExtraInfo(` --- 暂无已保存进度 ---`)
             }
-            
+
         }
     }
     function showExtraInfo(message) {
         // 显示额外信息
         const extraInfo = document.querySelector('.ex-info')
-        
+
         extraInfo.innerHTML = ''
         extraInfo.innerHTML = message
         extraInfo.style.animation = 'flashOnce 0.5s ease-in';
         setTimeout(() => {
             extraInfo.style.animation = '';
         }, 500);
-        
+
     }
 
     // 消息通知，显示临时消息
@@ -211,7 +227,7 @@ document.addEventListener("DOMContentLoaded", function () {
             opacity: 0.9;
             transition: opacity 0.3s ease;
         `;
-        
+
         switch (type) {
             case 'success':
                 messageDiv.style.backgroundColor = '#4caf50';
@@ -225,10 +241,10 @@ document.addEventListener("DOMContentLoaded", function () {
             default:
                 messageDiv.style.backgroundColor = '#2196f3';
         }
-        
+
         messageDiv.textContent = message;
         document.body.appendChild(messageDiv);
-        
+
         setTimeout(() => {
             messageDiv.style.opacity = '0';
             setTimeout(() => {
@@ -251,11 +267,11 @@ document.addEventListener("DOMContentLoaded", function () {
     // 使用本地数据时更新格子类型的辅助函数
     function updateCellType(cell, type) {
         if (!cell) return;
-        
+
         const row = parseInt(cell.dataset.row);
         const col = parseInt(cell.dataset.col);
         const cellKey = `${row},${col}`;
-        
+
         if (gridData[cellKey]) {
             gridData[cellKey].type = type;
             updateCellAppearance(cell, gridData[cellKey]);
@@ -266,7 +282,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function redrawConnections() {
         // 清除现有连接线
         document.querySelectorAll('.connection').forEach(el => el.remove());
-        
+
         // 重绘每个连接线
         connections.forEach(connection => {
             drawConnection(connection);
@@ -668,7 +684,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 yiyu: "var(--yiyu-color)"
             };
             this.style.setProperty('--current-color', typeColors[gridData[cellKey].type] || "var(--unknown-color)");
-            
+
             // 触发自动保存
             triggerAutoSave();
         });
@@ -958,7 +974,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     "var(--unknown-color)"
                 );
             }
-            
+
             // 触发自动保存
             triggerAutoSave();
         }
@@ -1211,7 +1227,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         // 不需要额外保存表单数据，因为option-button的点击事件已经处理了
-        
+
         // 触发自动保存
         triggerAutoSave();
     }
@@ -1347,9 +1363,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
             // 清除本地存储
             clearLocalStorage();
-            
+
             initializeGrid(rows, cols, startRow, startCol);
-            
+
             showTemporaryMessage('已重置所有数据', 'info');
             showExtraInfo(`--- 暂无已保存记录 ---`)
         }
@@ -1620,7 +1636,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // 更新单元格外观
         updateCellAppearance(currentCell, gridData[cellKey]);
-        
+
         // 触发自动保存
         triggerAutoSave();
     }
@@ -1842,6 +1858,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     break;
                 }
             }
+            triggerAutoSave();
         };
 
         // 添加事件监听器
@@ -2064,16 +2081,16 @@ document.addEventListener("DOMContentLoaded", function () {
         else if (type === 'shiyi' && cellData.formData.shiyi) {
             icons.push(cellData.formData.shiyi);
         }
-        else if (type === 'huoluan'&& cellData.formData.stage) {
+        else if (type === 'huoluan' && cellData.formData.stage) {
             // {stage: 'S3', variant: 'V2'}
             // 关卡名:
-            const stage = `${huoluanStage[cellData.formData.stage].name.substring(0,2)}`
+            const stage = `${huoluanStage[cellData.formData.stage].name.substring(0, 2)}`
             let mark = ``
 
-            if (cellData.formData.variant){
+            if (cellData.formData.variant) {
                 // 如果有变体选项
-                const variant = huoluanStage[cellData.formData.stage].variants[parseInt(cellData.formData.variant.substring(1), 10)-1];                
-                mark = `huoluan_${stage}/${variant.substring(0,2)}`;
+                const variant = huoluanStage[cellData.formData.stage].variants[parseInt(cellData.formData.variant.substring(1), 10) - 1];
+                mark = `huoluan_${stage}/${variant.substring(0, 2)}`;
 
             } else {
 
@@ -2082,7 +2099,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             icons.push(mark)
 
-            
+
             // 祸乱类型显示关卡和变体
             // 当选中祸乱关卡时，在右上角显示关卡名。当同时选中变体时，增加显示1,2……
             // 如只选中“地有四难”时，显示p: 地
@@ -2092,8 +2109,8 @@ document.addEventListener("DOMContentLoaded", function () {
             //    name: "地有四难",
             //    variants: ["四奖励一敌人", "一隐藏四敌人（刺箱）"]
             //},
-            
-        } 
+
+        }
 
         // 如果有需要显示的图标
         if (icons.length > 0) {
@@ -2107,7 +2124,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     badge.innerHTML = RewardIcons[iconName];
                     badgeContainer.appendChild(badge);
 
-                }else if(iconName.includes('huoluan_')){
+                } else if (iconName.includes('huoluan_')) {
 
                     // 显示祸乱字符串
                     const badge = document.createElement('div');
@@ -2369,7 +2386,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // 检查历史数据
     checkForHistoryData();
-    
+
     // 如果没有历史数据或用户选择不恢复，则初始化默认网格
     const savedData = loadFromLocalStorage();
     if (!savedData || !savedData.timestamp) {
