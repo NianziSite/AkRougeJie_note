@@ -19,6 +19,244 @@ document.addEventListener("DOMContentLoaded", function () {
     // 是否正在拖拽
     let isDragging = false;
 
+    // =============== 本地存储功能 START ===============
+    const STORAGE_KEY = 'akrougejie_map_data';
+    
+    // 保存数据到本地存储
+    function saveToLocalStorage() {
+        try {
+            const dataToSave = {
+                gridData: gridData,
+                connections: connections,
+                candleValue: document.getElementById('candle')?.value || 0,
+                gridConfig: {
+                    rows: parseInt(document.getElementById('rows')?.value) || 5,
+                    cols: parseInt(document.getElementById('cols')?.value) || 7,
+                    startRow: parseInt(document.getElementById('start-row')?.value) || 3,
+                    startCol: parseInt(document.getElementById('start-col')?.value) || 4
+                },
+                timestamp: new Date().toISOString(),
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
+        } catch (error) {
+            console.warn('保存数据到本地存储失败:', error);
+        }
+    }
+
+    // 从本地存储加载数据
+    function loadFromLocalStorage() {
+        try {
+            const savedData = localStorage.getItem(STORAGE_KEY);
+            if (savedData) {
+                return JSON.parse(savedData);
+            }
+        } catch (error) {
+            console.warn('从本地存储加载数据失败:', error);
+        }
+        return null;
+    }
+
+    // 恢复数据到界面
+    function restoreData(data) {
+        if (!data) return false;
+
+        try {
+            // 恢复网格配置
+            if (data.gridConfig) {
+                document.getElementById('rows').value = data.gridConfig.rows;
+                document.getElementById('cols').value = data.gridConfig.cols;
+                document.getElementById('start-row').value = data.gridConfig.startRow;
+                document.getElementById('start-col').value = data.gridConfig.startCol;
+            }
+
+            // 恢复烛火值
+            if (data.candleValue !== undefined) {
+                document.getElementById('candle').value = data.candleValue;
+            }
+
+            // 重新初始化网格
+            const rows = data.gridConfig?.rows || 5;
+            const cols = data.gridConfig?.cols || 7;
+            const startRow = data.gridConfig?.startRow || 3;
+            const startCol = data.gridConfig?.startCol || 4;
+            
+            initializeGrid(rows, cols, startRow, startCol);
+
+            // 恢复网格数据
+            if (data.gridData) {
+                gridData = data.gridData;
+                
+                // 更新每个格子的显示
+                Object.keys(gridData).forEach(cellKey => {
+                    const [row, col] = cellKey.split(',').map(Number);
+                    const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                    if (cell && gridData[cellKey]) {
+                        const cellData = gridData[cellKey];
+                        
+                        // 更新格子类型
+                        updateCellType(cell, cellData.type);
+                        
+                        // 更新关闭状态
+                        if (cellData.closed) {
+                            cell.classList.add('closed');
+                        } else {
+                            cell.classList.remove('closed');
+                        }
+
+                        // 更新收藏状态
+                        if (cellData.favorite) {
+                            updateStarAppearance(cell, true);
+                        }
+
+                        // 更新标记显示
+                        if (cellData.formData || cellData.type === 'huoluan') {
+                            updateCellBadge(cell, cellData);
+                        }
+                    }
+                });
+            }
+
+            // 恢复连接线
+            if (data.connections) {
+                connections = data.connections;
+                redrawConnections();
+            }
+
+            return true;
+        } catch (error) {
+            console.error('恢复数据时出错:', error);
+            return false;
+        }
+    }
+
+    // 清除本地存储数据
+    function clearLocalStorage() {
+        try {
+            localStorage.removeItem(STORAGE_KEY);
+        } catch (error) {
+            console.warn('清除本地存储失败:', error);
+        }
+    }
+
+    // 检查gridData是否所有元素type都是unknown
+    function isAllGridDataUnknown(gridData) {
+        if (!gridData || Object.keys(gridData).length === 0) {
+            return false; // 空数据不算all unknown
+        }
+        
+        return Object.values(gridData).every(cellData => 
+            cellData && cellData.type === 'unknown'
+        );
+    }
+
+    // 检查是否有历史数据并提示用户
+    function checkForHistoryData() {
+        const savedData = loadFromLocalStorage();
+        if (savedData && savedData.timestamp) {
+            // 检查是否所有gridData的type都是unknown，如果是则不使用历史数据
+            if (savedData.gridData && isAllGridDataUnknown(savedData.gridData)) {
+                clearLocalStorage();
+                return;
+            }
+            
+            const saveTime = new Date(savedData.timestamp);
+            const timeStr = saveTime.toLocaleString('zh-CN');
+            
+            const shouldRestore = confirm(
+                `检测到本地保存的进度数据（保存时间：${timeStr}）\n\n是否要恢复上次的进度？\n\n点击"确定"恢复进度，点击"取消"开始新的记录。`
+            );
+            
+            if (shouldRestore) {
+                const restored = restoreData(savedData);
+                if (restored) {
+                    showTemporaryMessage('✓ 已恢复历史进度', 'success');
+                } else {
+                    showTemporaryMessage('⚠ 恢复历史进度失败，将开始新的记录', 'warning');
+                }
+            } else {
+                // 用户选择不恢复，清除旧数据
+                clearLocalStorage();
+                showTemporaryMessage('已开始新的记录', 'info');
+            }
+        }
+    }
+
+    // 消息通知，显示临时消息
+    function showTemporaryMessage(message, type = 'info') {
+        const messageDiv = document.createElement('div');
+        messageDiv.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 20px;
+            border-radius: 4px;
+            color: white;
+            font-weight: bold;
+            z-index: 10000;
+            opacity: 0.9;
+            transition: opacity 0.3s ease;
+        `;
+        
+        switch (type) {
+            case 'success':
+                messageDiv.style.backgroundColor = '#4caf50';
+                break;
+            case 'warning':
+                messageDiv.style.backgroundColor = '#ff9800';
+                break;
+            case 'error':
+                messageDiv.style.backgroundColor = '#f44336';
+                break;
+            default:
+                messageDiv.style.backgroundColor = '#2196f3';
+        }
+        
+        messageDiv.textContent = message;
+        document.body.appendChild(messageDiv);
+        
+        setTimeout(() => {
+            messageDiv.style.opacity = '0';
+            setTimeout(() => {
+                if (messageDiv.parentNode) {
+                    messageDiv.parentNode.removeChild(messageDiv);
+                }
+            }, 300);
+        }, 3000);
+    }
+
+    // 自动保存触发器，500ms防抖
+    function triggerAutoSave() {
+        clearTimeout(window.autoSaveTimeout);
+        window.autoSaveTimeout = setTimeout(saveToLocalStorage, 500);
+    }
+
+    // 使用本地数据时更新格子类型的辅助函数
+    function updateCellType(cell, type) {
+        if (!cell) return;
+        
+        const row = parseInt(cell.dataset.row);
+        const col = parseInt(cell.dataset.col);
+        const cellKey = `${row},${col}`;
+        
+        if (gridData[cellKey]) {
+            gridData[cellKey].type = type;
+            updateCellAppearance(cell, gridData[cellKey]);
+        }
+    }
+
+    // 使用本地数据时重绘所有连接线的函数
+    function redrawConnections() {
+        // 清除现有连接线
+        document.querySelectorAll('.connection').forEach(el => el.remove());
+        
+        // 重绘每个连接线
+        connections.forEach(connection => {
+            drawConnection(connection);
+        });
+    }
+    // =============== 本地存储功能 END ===============
+
+
     document.addEventListener('contextmenu', function (e) {
         const popup = document.getElementById('popup');
         const textarea = document.getElementById('cell-notes');
@@ -268,6 +506,8 @@ document.addEventListener("DOMContentLoaded", function () {
         if (gridData[cellKey]) {
             gridData[cellKey].favorite = !gridData[cellKey].favorite;
             updateStarAppearance(cell, gridData[cellKey].favorite);
+            // 触发自动保存
+            triggerAutoSave();
         }
     }
 
@@ -410,6 +650,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 yiyu: "var(--yiyu-color)"
             };
             this.style.setProperty('--current-color', typeColors[gridData[cellKey].type] || "var(--unknown-color)");
+            
+            // 触发自动保存
+            triggerAutoSave();
         });
     });
 
@@ -515,7 +758,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 connections.push(connection);
                 drawConnection(connection);
             }
-
+            // 触发自动保存
+            triggerAutoSave();
             // 更新起始点为当前单元格
             startCell = { row, col };
         }
@@ -696,6 +940,9 @@ document.addEventListener("DOMContentLoaded", function () {
                     "var(--unknown-color)"
                 );
             }
+            
+            // 触发自动保存
+            triggerAutoSave();
         }
     }
 
@@ -946,6 +1193,9 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         // 不需要额外保存表单数据，因为option-button的点击事件已经处理了
+        
+        // 触发自动保存
+        triggerAutoSave();
     }
 
     // 更新单元格外观
@@ -1069,7 +1319,7 @@ document.addEventListener("DOMContentLoaded", function () {
     resetBtn.addEventListener("click", function () {
         if (
             confirm(
-                "确定要重置所有数据吗？这将清除所有格点信息和连接。"
+                "确定要重置所有数据吗？这将清除所有格点信息、连接和本地保存的数据。"
             )
         ) {
             const rows = parseInt(rowsInput.value) || 5;
@@ -1077,7 +1327,12 @@ document.addEventListener("DOMContentLoaded", function () {
             const startRow = parseInt(startRowInput.value) || 3;
             const startCol = parseInt(startColInput.value) || 4;
 
+            // 清除本地存储
+            clearLocalStorage();
+            
             initializeGrid(rows, cols, startRow, startCol);
+            
+            showTemporaryMessage('已重置所有数据', 'info');
         }
     });
 
@@ -1157,7 +1412,7 @@ document.addEventListener("DOMContentLoaded", function () {
      * param {Object} result - recognizeMap函数的返回结果
      */
 
-    // 监听是否勾选“保留数据”改变提0示文档
+    // 监听是否勾选"保留数据"改变提示文档
     // 获取复选框状态
     const preserveData_hint = document.getElementById("preserve-data").checked;
 
@@ -1346,6 +1601,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // 更新单元格外观
         updateCellAppearance(currentCell, gridData[cellKey]);
+        
+        // 触发自动保存
+        triggerAutoSave();
     }
 
     typeButtons.forEach((btn) => {
@@ -2024,11 +2282,15 @@ document.addEventListener("DOMContentLoaded", function () {
         } else {
             this.value = value; // 确保是整数
         }
+        // 触发自动保存
+        triggerAutoSave();
     });
 
     // 重置函数 - 可以被其他函数调用
     window.resetCandle = function () {
         candleInput.value = 0;
+        // 触发自动保存
+        triggerAutoSave();
     };
 
     // 改变烛火值的函数
@@ -2036,6 +2298,8 @@ document.addEventListener("DOMContentLoaded", function () {
         let current = parseInt(candleInput.value);
         if (isNaN(current)) current = 0;
         candleInput.value = current + amount;
+        // 触发自动保存
+        triggerAutoSave();
     };
 
 
@@ -2083,6 +2347,12 @@ document.addEventListener("DOMContentLoaded", function () {
     };
 }*/
 
-    // 初始化默认网格
-    initializeGrid(5, 7, 3, 4);
+    // 检查历史数据
+    checkForHistoryData();
+    
+    // 如果没有历史数据或用户选择不恢复，则初始化默认网格
+    const savedData = loadFromLocalStorage();
+    if (!savedData || !savedData.timestamp) {
+        initializeGrid(5, 7, 3, 4);
+    }
 });
